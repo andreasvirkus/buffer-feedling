@@ -1,0 +1,8 @@
+node_modules
+.output
+.wxt
+stats.html
+*.pem
+.env*
+web-ext.config.ts
+.venv
