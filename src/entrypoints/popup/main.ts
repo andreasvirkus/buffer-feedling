@@ -21,56 +21,118 @@ const ago = (iso: string) => {
   return min < 1 ? 'just now' : `${min} min ago`;
 };
 
+function h<K extends keyof HTMLElementTagNameMap>(
+  tag: K,
+  props: Partial<Record<'className' | 'textContent', string>> & { attrs?: Record<string, string> } = {},
+  ...kids: (Node | string)[]
+) {
+  const el = document.createElement(tag);
+  const { attrs, ...rest } = props;
+  Object.assign(el, rest);
+  for (const [k, v] of Object.entries(attrs ?? {})) el.setAttribute(k, v);
+  el.append(...kids);
+  return el;
+}
+
+const button = (label: string, onClick: () => void, primary = false) => {
+  const b = h('button', { textContent: label, className: primary ? 'primary' : '', attrs: { type: 'button' } });
+  b.onclick = onClick;
+  return b;
+};
+
+const SERVICE_LABEL: Record<string, string> = {
+  twitter: 'X',
+  linkedin: 'LinkedIn',
+  googlebusiness: 'Google Business',
+  tiktok: 'TikTok',
+  youtube: 'YouTube',
+};
+const serviceLabel = (s: string) => SERVICE_LABEL[s] ?? s[0]!.toUpperCase() + s.slice(1);
+
+// content/full/eating have no sprite of their own yet
+const SPRITE: Record<string, string> = { hungry: 'hungry', sleepy: 'sleepy' };
+const sprite = (mood: string) =>
+  h(
+    'div',
+    { className: 'sprite' },
+    h('img', { attrs: { src: `/sprites/sproutling-${SPRITE[mood] ?? 'idle'}.png`, alt: '', width: '32', height: '32' } }),
+  );
+
 async function render() {
   const { petState, pollMeta } = await readStored();
-  app.replaceChildren();
+  const nodes: Node[] = [];
 
-  const add = <K extends keyof HTMLElementTagNameMap>(tag: K, text: string, parent: HTMLElement = app) => {
-    const el = document.createElement(tag);
-    el.textContent = text;
-    parent.append(el);
-    return el;
-  };
-
-  if (flash) add('p', flash).setAttribute('role', 'alert');
+  if (flash) nodes.push(h('p', { className: 'banner', textContent: flash, attrs: { role: 'alert' } }));
 
   if (!status.connected) {
-    add('p', 'Connect Buffer to feed your feedling.');
-    add('button', 'Connect Buffer').onclick = () => act('CONNECT');
-    return;
+    nodes.push(
+      h(
+        'div',
+        { className: 'hero' },
+        sprite('sleepy'),
+        h('div', {}, h('h1', { textContent: 'Feedling' }), h('p', { className: 'lede', textContent: 'Connect Buffer to wake your pet up.' })),
+      ),
+      button('Connect Buffer', () => act('CONNECT'), true),
+    );
+    return app.replaceChildren(...nodes);
   }
-
-  add('p', `Connected as ${status.account?.name ?? 'your Buffer account'}`);
 
   if (pollMeta?.error) {
     const until = pollMeta.rateLimitedUntil;
     const wait = until && until > Date.now() ? ` Trying again in ${Math.ceil((until - Date.now()) / 1000)}s.` : '';
-    add('p', `Couldn't reach Buffer: ${pollMeta.error}.${wait}`).setAttribute('role', 'status');
+    nodes.push(h('p', { className: 'banner', textContent: `Couldn't reach Buffer: ${pollMeta.error}.${wait}`, attrs: { role: 'status' } }));
   }
 
   if (petState) {
-    const rows: [string, string][] = [
-      ['Mood', petState.mood],
-      ['Fullness', `${pct(petState.fullness)} (${petState.sent} of ${petState.target} posts)`],
-      ['Fridge', `${petState.fridge} scheduled`],
-      ['Snacks today', `${petState.snacksToday} drafts`],
-      ['Treats today', `${petState.treats} ideas`],
-      ['Age', `${petState.age} days`],
-      ['Sites', petState.connectedServices.join(', ') || 'none'],
-      ['Updated', ago(petState.updatedAt)],
-    ];
-    const dl = document.createElement('dl');
-    for (const [k, v] of rows) {
-      add('dt', k, dl);
-      add('dd', v, dl);
+    const { mood, fullness, sent, target } = petState;
+    nodes.push(
+      h(
+        'div',
+        { className: 'hero' },
+        sprite(mood),
+        h('div', {}, h('h1', { textContent: 'Feedling' }), h('span', { className: 'chip', textContent: mood, attrs: { 'data-mood': mood } })),
+      ),
+      h(
+        'div',
+        { className: 'card' },
+        h('div', { className: 'meter-head' }, h('span', { textContent: 'Fullness' }), h('span', { textContent: `${sent} of ${target} posts · ${pct(fullness)}` })),
+        h(
+          'div',
+          { className: 'meter', attrs: { role: 'meter', 'aria-label': 'Fullness', 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-valuenow': String(Math.round(fullness * 100)) } },
+          Object.assign(h('div'), { style: `width:${pct(fullness)}` }),
+        ),
+      ),
+      h(
+        'dl',
+        { className: 'card stats' },
+        ...(
+          [
+            ['Fridge', petState.fridge],
+            ['Snacks', petState.snacksToday],
+            ['Treats', petState.treats],
+            ['Days', petState.age],
+          ] as const
+        ).map(([k, v]) => h('div', {}, h('dt', { textContent: k }), h('dd', { textContent: String(v) }))),
+      ),
+    );
+    if (petState.connectedServices.length) {
+      nodes.push(h('ul', { className: 'sites', attrs: { 'aria-label': 'Connected sites' } }, ...petState.connectedServices.map((s) => h('li', { textContent: serviceLabel(s) }))));
     }
-    app.append(dl);
+    nodes.push(h('p', { className: 'foot', textContent: `Connected as ${status.account?.name ?? 'your Buffer account'} · updated ${ago(petState.updatedAt)}` }));
   } else {
-    add('p', 'Your feedling is warming up…');
+    nodes.push(
+      h(
+        'div',
+        { className: 'hero' },
+        sprite('sleepy'),
+        h('div', {}, h('h1', { textContent: 'Feedling' }), h('p', { className: 'lede', textContent: 'Warming up…' })),
+      ),
+      h('p', { className: 'foot', textContent: `Connected as ${status.account?.name ?? 'your Buffer account'}` }),
+    );
   }
 
-  add('button', 'Refresh now').onclick = () => act('REFRESH_NOW');
-  add('button', 'Disconnect').onclick = () => act('DISCONNECT');
+  nodes.push(h('div', { className: 'actions' }, button('Refresh', () => act('REFRESH_NOW')), button('Disconnect', () => act('DISCONNECT'))));
+  app.replaceChildren(...nodes);
 }
 
 async function act(type: 'CONNECT' | 'DISCONNECT' | 'REFRESH_NOW') {
