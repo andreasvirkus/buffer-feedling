@@ -156,10 +156,10 @@ def hatchling(state):
     return s.image()
 
 
-def sproutling(state, squash=0, leaf_dx=0, leaf_dy=0, droop=0, blink=False):
+def sproutling(state, squash=0, leaf_dx=0, leaf_dy=0, droop=0, blink=False, mouth=1.0):
     """squash: +1 squash (1px shorter, 1px wider), -1 stretch; feet stay planted.
     Face and arms follow the body; leaves are offset independently (they lag).
-    droop: left leaf sags this many px."""
+    droop: left leaf sags this many px. mouth: open-mouth scale (hungry/eating), 0 = closed."""
     s = Sprite()
     fy = squash
     s.ellipse(12, 27, 2.6, 1.8, "mint")               # feet
@@ -179,11 +179,22 @@ def sproutling(state, squash=0, leaf_dx=0, leaf_dy=0, droop=0, blink=False):
         s.smile(14, 21 + fy, 4)
         s.blush([(10, 20 + fy), (11, 20 + fy), (21, 20 + fy), (22, 20 + fy)])
     elif state == "hungry":
-        s.eye_happy(12, 16); s.eye_happy(19, 16)
-        s.open_mouth(16, 22.5, 3.2, 3)
-        s.blush([(9, 20), (10, 20), (22, 20), (23, 20)])
+        s.eye_happy(12, 16 + fy); s.eye_happy(19, 16 + fy)
+        s.open_mouth(16, 22.5 + fy, 3.2 * mouth, 3 * mouth)
+        s.blush([(9, 20 + fy), (10, 20 + fy), (22, 20 + fy), (23, 20 + fy)])
+    elif state == "full":
+        s.eye_happy(12, 16 + fy); s.eye_happy(19, 16 + fy)
+        s.smile(13, 21 + fy, 6)
+        s.blush([(9, 20 + fy), (10, 20 + fy), (11, 20 + fy), (21, 20 + fy), (22, 20 + fy), (23, 20 + fy)])
+    elif state == "eating":
+        s.eye_happy(12, 16 + fy); s.eye_happy(19, 16 + fy)
+        if mouth > 0:
+            s.open_mouth(16, 22.5 + fy, 3.2 * mouth, 3 * mouth)
+        else:
+            s.dots([(14, 22 + fy), (15, 22 + fy), (16, 22 + fy), (17, 22 + fy)], OUT)
+        s.blush([(9, 20 + fy), (10, 20 + fy), (22, 20 + fy), (23, 20 + fy)])
     else:
-        s.eye_closed(12, 16); s.eye_closed(19, 16); s.dots([(15, 22), (16, 22)], OUT)
+        s.eye_closed(12, 16 + fy); s.eye_closed(19, 16 + fy); s.dots([(15, 22 + fy), (16, 22 + fy)], OUT)
         s.zz(22, 1)
     return s.image()
 
@@ -286,58 +297,86 @@ SPRITES = ROOT / "src" / "public" / "sprites"
 PREVIEW = Path(__file__).resolve().parent / "preview"
 PREVIEW_BG = (206, 226, 188)
 
-# (kwargs for sproutling, duration ms). Squash/stretch moves the body and face;
-# leaves lag and sway by themselves. Feet never move.
-IDLE_FRAMES = [
-    (dict(), 300),                                                    # rest
-    (dict(squash=1), 150),                                            # squash, leaves stay up
-    (dict(), 150),                                                    # rest
-    (dict(squash=-1, leaf_dy=-1, droop=1, leaf_dx=-1), 200),          # stretch, leaves droop
-    (dict(leaf_dx=1), 300),                                           # sway other way
-]
+# name -> frames of (kwargs for sproutling, duration ms). Squash/stretch moves the body and
+# face; leaves lag and sway by themselves. Feet never move. "idle" is the content pet.
+ANIMATIONS = {
+    "idle": dict(state="idle", frames=[
+        (dict(), 300),                                                # rest
+        (dict(squash=1), 150),                                        # squash, leaves stay up
+        (dict(), 150),                                                # rest
+        (dict(squash=-1, leaf_dy=-1, droop=1, leaf_dx=-1), 200),      # stretch, leaves droop
+        (dict(leaf_dx=1), 300),                                       # sway other way
+    ]),
+    "hungry": dict(state="hungry", frames=[
+        (dict(), 500),
+        (dict(mouth=0.7, droop=1), 500),                              # mouth narrows, leaf sags
+    ]),
+    "sleepy": dict(state="sleepy", frames=[
+        (dict(), 900),
+        (dict(squash=1, droop=1), 900),                               # slow breathing
+    ]),
+    "full": dict(state="full", frames=[
+        (dict(), 350),
+        (dict(squash=-1, leaf_dy=-1), 180),                           # happy hop
+        (dict(), 350),
+        (dict(squash=1), 150),
+    ]),
+    "eating": dict(state="eating", frames=[
+        (dict(), 150),
+        (dict(mouth=0, squash=1), 120),                               # chomp
+        (dict(), 150),
+        (dict(mouth=0.7, squash=1), 120),
+    ]),
+}
 BLINK = dict(blink=True)
 BLINK_EVERY_MS = 4000
 BLINK_MS = 120
+GIF_MIN_MS = 2000
 
 
-def build_idle():
+def build_all():
     SPRITES.mkdir(parents=True, exist_ok=True)
     PREVIEW.mkdir(parents=True, exist_ok=True)
-
-    for state in STATES:
-        sproutling(state).save(SPRITES / f"sproutling-{state}.png")
-
-    frames = [sproutling("idle", **kw) for kw, _ in IDLE_FRAMES] + [sproutling("idle", **BLINK)]
-    sheet = Image.new("RGBA", (N * len(frames), N), (0, 0, 0, 0))
-    for i, f in enumerate(frames):
-        sheet.paste(f, (i * N, 0))
-    sheet.save(SPRITES / "sproutling-idle-sheet.png")
-
-    meta = {
-        "frameSize": N,
-        "frames": [{"x": i * N, "ms": ms} for i, (_, ms) in enumerate(IDLE_FRAMES)],
-        "blink": {"x": (len(frames) - 1) * N, "everyMs": BLINK_EVERY_MS, "ms": BLINK_MS},
-    }
-    (SPRITES / "sproutling-idle.json").write_text(json.dumps(meta, indent=2) + "\n")
-
-    # Review GIF: cycles up to the blink interval, then the blink, then loops
-    cycle_ms = sum(ms for _, ms in IDLE_FRAMES)
-    seq = [(frames[i], ms) for i, (_, ms) in enumerate(IDLE_FRAMES)] * (BLINK_EVERY_MS // cycle_ms)
-    seq.append((frames[-1], BLINK_MS))
 
     def on_bg(img):
         bg = Image.new("RGBA", img.size, PREVIEW_BG + (255,))
         bg.alpha_composite(img)
         return bg.convert("RGB").resize((N * SCALE, N * SCALE), Image.NEAREST)
 
-    shots = [on_bg(f) for f, _ in seq]
-    shots[0].save(PREVIEW / "sproutling-idle-preview.gif", save_all=True, append_images=shots[1:],
-                  duration=[ms for _, ms in seq], loop=0)
-    print(f"ok: {len(frames)} frames, cycle {cycle_ms}ms")
+    for name, anim in ANIMATIONS.items():
+        state, spec = anim["state"], anim["frames"]
+        has_blink = name == "idle"
+
+        frames = [sproutling(state, **kw) for kw, _ in spec]
+        frames[0].save(SPRITES / f"sproutling-{name}.png")
+        if has_blink:
+            frames.append(sproutling(state, **BLINK))
+
+        sheet = Image.new("RGBA", (N * len(frames), N), (0, 0, 0, 0))
+        for i, f in enumerate(frames):
+            sheet.paste(f, (i * N, 0))
+        sheet.save(SPRITES / f"sproutling-{name}-sheet.png")
+
+        meta = {"frameSize": N, "frames": [{"x": i * N, "ms": ms} for i, (_, ms) in enumerate(spec)]}
+        if has_blink:
+            meta["blink"] = {"x": (len(frames) - 1) * N, "everyMs": BLINK_EVERY_MS, "ms": BLINK_MS}
+        (SPRITES / f"sproutling-{name}.json").write_text(json.dumps(meta, indent=2) + "\n")
+
+        # Review GIF: idle runs to the blink interval then blinks; the rest loop to ~2s
+        cycle_ms = sum(ms for _, ms in spec)
+        base = [(frames[i], ms) for i, (_, ms) in enumerate(spec)]
+        if has_blink:
+            seq = base * (BLINK_EVERY_MS // cycle_ms) + [(frames[-1], BLINK_MS)]
+        else:
+            seq = base * max(1, -(-GIF_MIN_MS // cycle_ms))
+        shots = [on_bg(f) for f, _ in seq]
+        shots[0].save(PREVIEW / f"sproutling-{name}-preview.gif", save_all=True, append_images=shots[1:],
+                      duration=[ms for _, ms in seq], loop=0)
+        print(f"ok: {name}: {len(frames)} frames, cycle {cycle_ms}ms")
 
 
 if __name__ == "__main__":
     if "--concepts" in sys.argv:
         concept_sheet(PREVIEW / "concepts")
     else:
-        build_idle()
+        build_all()
