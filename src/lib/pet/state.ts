@@ -80,3 +80,9 @@ export function computePetState(i: PetInputs): PetState {
 /** Eating is transient, so it's derived at render time rather than stored */
 export const displayMood = (s: PetState, now: number): Mood =>
   s.lastFedAt !== undefined && now - Date.parse(s.lastFedAt) < EATING_MS ? 'eating' : s.mood;
+
+/** Sheet name for a mood; the neutral frames are called "idle" */
+export const spriteName = (m: Mood): string => (m === 'content' ? 'idle' : m);
+
+export const petLabel = (s: PetState | undefined, mood: Mood): string =>
+  s ? `Buffer Feedling: ${mood}, ${s.sent} of ${s.target} posts this week` : 'Buffer Feedling: waiting to be connected';

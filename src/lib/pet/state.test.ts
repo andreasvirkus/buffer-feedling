@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computePetState, displayMood, EATING_MS, SLEEPY_AFTER_MS, type PetInputs } from './state';
+import { computePetState, displayMood, EATING_MS, petLabel, SLEEPY_AFTER_MS, spriteName, type PetInputs } from './state';
 
 const NOW = Date.UTC(2026, 9, 20, 12);
 const base: PetInputs = {
@@ -126,5 +126,17 @@ describe('metadata', () => {
     const s = run({ lastFedAt: NOW - 60_000 });
     expect(s.updatedAt).toBe(new Date(NOW).toISOString());
     expect(s.lastFedAt).toBe(new Date(NOW - 60_000).toISOString());
+  });
+});
+
+describe('spriteName / petLabel', () => {
+  it('maps content to the idle sheet and leaves the others alone', () => {
+    expect(spriteName('content')).toBe('idle');
+    expect(['hungry', 'full', 'sleepy', 'eating'].map((m) => spriteName(m as never))).toEqual(['hungry', 'full', 'sleepy', 'eating']);
+  });
+  it('describes progress, and the not-connected case', () => {
+    const s = run({ goals: [goal(5, 2)] });
+    expect(petLabel(s, 'content')).toBe('Buffer Feedling: content, 2 of 5 posts this week');
+    expect(petLabel(undefined, 'sleepy')).toContain('waiting');
   });
 });

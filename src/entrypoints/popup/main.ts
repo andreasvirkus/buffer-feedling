@@ -1,5 +1,5 @@
 import type { PollMeta } from '@/lib/poller';
-import type { PetState } from '@/lib/pet/state';
+import { spriteName, type Mood, type PetState } from '@/lib/pet/state';
 import { send, type ConnectionStatus } from '@/lib/messages';
 
 const app = document.querySelector<HTMLElement>('#app')!;
@@ -49,13 +49,11 @@ const SERVICE_LABEL: Record<string, string> = {
 };
 const serviceLabel = (s: string) => SERVICE_LABEL[s] ?? s[0]!.toUpperCase() + s.slice(1);
 
-// content/full/eating have no sprite of their own yet
-const SPRITE: Record<string, string> = { hungry: 'hungry', sleepy: 'sleepy' };
-const sprite = (mood: string) =>
+const sprite = (mood: Mood) =>
   h(
     'div',
     { className: 'sprite' },
-    h('img', { attrs: { src: `/sprites/sproutling-${SPRITE[mood] ?? 'idle'}.png`, alt: '', width: '32', height: '32' } }),
+    h('img', { attrs: { src: `/sprites/sproutling-${spriteName(mood)}.png`, alt: '', width: '32', height: '32' } }),
   );
 
 async function render() {
