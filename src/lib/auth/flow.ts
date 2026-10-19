@@ -4,6 +4,18 @@ import type { Account } from '../messages';
 import { buildAuthorizeUrl, createPkcePair, createState } from './pkce';
 import { exchangeCode, tokenManager } from './tokens';
 
+// Everything we persist besides tokens; wiped on disconnect
+const DERIVED_KEYS = ['account', 'petState', 'pollMeta', 'connectedAt', 'lastFedAt'];
+
+export async function fetchAccount(): Promise<Account> {
+  const { account } = await graphql<{ account: { name: string | null; email: string; organizations: { id: string }[] } }>(
+    ACCOUNT_QUERY,
+  );
+  const org = account.organizations[0];
+  if (!org) throw new Error('No Buffer organization found on this account');
+  return { name: account.name ?? account.email, email: account.email, organizationId: org.id };
+}
+
 export async function connect(): Promise<Account> {
   const redirectUri = browser.identity.getRedirectURL();
   const { verifier, challenge } = await createPkcePair();
@@ -23,16 +35,18 @@ export async function connect(): Promise<Account> {
 
   await tokenManager.save(await exchangeCode({ code, verifier, redirectUri }));
 
-  const { account } = await graphql<{ account: Account }>(ACCOUNT_QUERY);
-  await browser.storage.local.set({ account });
+  const account = await fetchAccount();
+  const { connectedAt } = await browser.storage.local.get('connectedAt');
+  await browser.storage.local.set({ account, connectedAt: connectedAt ?? Date.now() });
   return account;
 }
 
 export async function disconnect() {
   await tokenManager.disconnect();
-  await browser.storage.local.remove('account');
+  await browser.storage.local.remove(DERIVED_KEYS);
 }
 
 export async function getAccount(): Promise<Account | undefined> {
-  return ((await browser.storage.local.get('account')).account as Account | undefined) ?? undefined;
+  const { account } = await browser.storage.local.get('account');
+  return (account as Account | undefined)?.organizationId ? (account as Account) : undefined;
 }
