@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computePetState, EATING_MS, SLEEPY_AFTER_MS, type PetInputs } from './state';
+import { computePetState, displayMood, EATING_MS, SLEEPY_AFTER_MS, type PetInputs } from './state';
 
 const NOW = Date.UTC(2026, 9, 20, 12);
 const base: PetInputs = {
@@ -95,12 +95,22 @@ describe('mood', () => {
   it('full beats sleepy', () => {
     expect(run({ goals: [goal(1, 1)], lastActivityAt: null }).mood).toBe('full');
   });
-  it('eating for 5s after a feed, then back to normal', () => {
-    expect(run({ lastFedAt: NOW - EATING_MS + 1 }).mood).toBe('eating');
-    expect(run({ lastFedAt: NOW - EATING_MS, goals: [goal(5, 1)] }).mood).toBe('hungry');
+  it('never stores eating as the base mood', () => {
+    expect(run({ goals: [goal(1, 1)], lastFedAt: NOW - 1000 }).mood).toBe('full');
   });
-  it('eating beats full', () => {
-    expect(run({ goals: [goal(1, 1)], lastFedAt: NOW - 1000 }).mood).toBe('eating');
+});
+
+describe('displayMood', () => {
+  const fed = (ago: number) => run({ goals: [goal(5, 1)], lastFedAt: NOW - ago });
+  it('shows eating for 5s after a feed, even over full', () => {
+    expect(displayMood(fed(EATING_MS - 1), NOW)).toBe('eating');
+    expect(displayMood(run({ goals: [goal(1, 1)], lastFedAt: NOW - 1000 }), NOW)).toBe('eating');
+  });
+  it('falls back to the stored mood once the window passes', () => {
+    expect(displayMood(fed(EATING_MS), NOW)).toBe('hungry');
+  });
+  it('shows the stored mood when never fed', () => {
+    expect(displayMood(run({ goals: [goal(5, 1)] }), NOW)).toBe('hungry');
   });
 });
 

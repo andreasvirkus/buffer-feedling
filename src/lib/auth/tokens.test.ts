@@ -62,6 +62,15 @@ describe('token manager', () => {
     expect(await m.getAccessToken()).toBe('a2');
   });
 
+  it('ends the session when expired and no refresh token was issued', async () => {
+    const store = memoryStore({ accessToken: 'a1', refreshToken: null, expiresAt: 0 });
+    const refresh = vi.fn();
+    const m = createTokenManager({ store, refresh, now: () => 10 });
+    await expect(m.getAccessToken()).rejects.toThrow('connect again');
+    expect(refresh).not.toHaveBeenCalled();
+    expect(store.value).toBeNull();
+  });
+
   it('forceRefresh rotates even when fresh', async () => {
     const store = memoryStore(tok('1', 9_999));
     const m = createTokenManager({ store, refresh: async () => tok('2', 9_999), now: () => 0 });

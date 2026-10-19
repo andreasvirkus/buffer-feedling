@@ -2,7 +2,7 @@ import { CLIENT_ID, TOKEN_URL } from '../config';
 
 export interface Tokens {
   accessToken: string;
-  refreshToken: string;
+  refreshToken: string | null;
   expiresAt: number;
 }
 
@@ -30,10 +30,9 @@ export async function requestTokens(params: Record<string, string>, now = Date.n
   if (!res.ok || json.error) {
     throw new OAuthError(json.error_description || json.error || `HTTP ${res.status}`, json.error);
   }
-  if (!json.refresh_token) throw new OAuthError('No refresh token returned; is offline_access enabled?');
   return {
     accessToken: json.access_token,
-    refreshToken: json.refresh_token,
+    refreshToken: json.refresh_token ?? null,
     expiresAt: expiresAtFrom(now, Number(json.expires_in) || 3600),
   };
 }
@@ -67,6 +66,8 @@ export function createTokenManager(deps: {
   function refreshOnce(current: Tokens): Promise<Tokens> {
     inflight ??= (async () => {
       try {
+        // Without offline_access there is nothing to refresh with; the session just ends
+        if (!current.refreshToken) throw new OAuthError('Session expired, connect again', 'invalid_grant');
         const next = await refresh(current.refreshToken);
         await store.set(next); // persist the rotated token before anyone uses it
         return next;

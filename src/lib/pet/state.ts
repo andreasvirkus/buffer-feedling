@@ -1,7 +1,8 @@
-export type Mood = 'hungry' | 'content' | 'full' | 'sleepy' | 'eating';
+export type BaseMood = 'hungry' | 'content' | 'full' | 'sleepy';
+export type Mood = BaseMood | 'eating';
 
 export interface PetState {
-  mood: Mood;
+  mood: BaseMood;
   fullness: number; // 0..1
   fridge: number; // scheduled posts coming up
   snacksToday: number; // drafts created today
@@ -29,7 +30,7 @@ export interface PetInputs {
   ideasToday: number;
   lastActivityAt: number | null;
   connectedAt: number | null;
-  lastFedAt?: number;
+  lastFedAt?: number; // ms
   services: string[];
 }
 
@@ -54,11 +55,9 @@ export function computePetState(i: PetInputs): PetState {
   const fullness = clamp01(sent / target + snackBonus);
 
   const idle = i.lastActivityAt === null || i.now - i.lastActivityAt >= SLEEPY_AFTER_MS;
-  const eating = i.lastFedAt !== undefined && i.now - i.lastFedAt < EATING_MS;
 
-  let mood: Mood;
-  if (eating) mood = 'eating';
-  else if (fullness >= 1) mood = 'full';
+  let mood: BaseMood;
+  if (fullness >= 1) mood = 'full';
   else if (fullness >= 0.4 || fridge > 0) mood = 'content';
   else if (idle) mood = 'sleepy';
   else mood = 'hungry';
@@ -77,3 +76,7 @@ export function computePetState(i: PetInputs): PetState {
     updatedAt: new Date(i.now).toISOString(),
   };
 }
+
+/** Eating is transient, so it's derived at render time rather than stored */
+export const displayMood = (s: PetState, now: number): Mood =>
+  s.lastFedAt !== undefined && now - Date.parse(s.lastFedAt) < EATING_MS ? 'eating' : s.mood;

@@ -5,7 +5,7 @@ import { buildAuthorizeUrl, createPkcePair, createState } from './pkce';
 import { exchangeCode, tokenManager } from './tokens';
 
 // Everything we persist besides tokens; wiped on disconnect
-const DERIVED_KEYS = ['account', 'petState', 'pollMeta', 'connectedAt', 'lastFedAt'];
+const DERIVED_KEYS = ['account', 'petState', 'pollMeta', 'connectedAt', 'lastFedAt', 'seenAt'];
 
 export async function fetchAccount(): Promise<Account> {
   const { account } = await graphql<{ account: { name: string | null; email: string; organizations: { id: string }[] } }>(

@@ -9,7 +9,8 @@ export interface ConnectionStatus {
   account?: Account;
 }
 
-export type Message = { type: 'CONNECT' } | { type: 'DISCONNECT' } | { type: 'GET_STATUS' } | { type: 'REFRESH_NOW' };
+export type Message = { type: 'CONNECT' } | { type: 'DISCONNECT' } | { type: 'GET_STATUS' } | { type: 'REFRESH_NOW' }
+  | { type: 'POLL_HINT' };
 
 export type Reply<T = ConnectionStatus> = { ok: true; data: T } | { ok: false; error: string };
 

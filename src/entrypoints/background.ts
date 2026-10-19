@@ -1,7 +1,9 @@
 import { connect, disconnect, getAccount } from '@/lib/auth/flow';
 import { tokenManager } from '@/lib/auth/tokens';
 import type { ConnectionStatus, Message, Reply } from '@/lib/messages';
-import { POLL_ALARM, POLL_MINUTES, pollOnce } from '@/lib/poller';
+import { POLL_ALARM, POLL_MINUTES, pollIfStale, pollOnce } from '@/lib/poller';
+
+const HINT_MIN_INTERVAL_MS = 60_000;
 
 async function status(): Promise<ConnectionStatus> {
   return (await tokenManager.isConnected())
@@ -15,6 +17,7 @@ async function handle(msg: Message): Promise<ConnectionStatus> {
     await pollOnce();
   }
   if (msg.type === 'DISCONNECT') await disconnect();
+  if (msg.type === 'POLL_HINT') await pollIfStale(HINT_MIN_INTERVAL_MS);
   if (msg.type === 'REFRESH_NOW') {
     // Manual refresh overrides a previous backoff or error
     await browser.storage.local.remove('pollMeta');
@@ -33,8 +36,8 @@ export default defineBackground(() => {
   browser.runtime.onInstalled.addListener(() => void pollOnce());
 
   browser.runtime.onMessage.addListener((msg: Message, sender, sendResponse) => {
-    // Only our own pages (popup) may drive auth, never content scripts
-    if (sender.tab) return;
+    // Content scripts may only nudge a poll, never drive auth
+    if (sender.tab && msg.type !== 'POLL_HINT') return;
     handle(msg).then(
       (data): void => sendResponse({ ok: true, data } satisfies Reply),
       (e: Error): void => sendResponse({ ok: false, error: e.message } satisfies Reply),

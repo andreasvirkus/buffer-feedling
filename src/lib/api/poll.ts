@@ -24,6 +24,10 @@ export function pollVariables(now: number, org: string) {
 
 export const startOfLocalDay = (now: number) => new Date(now).setHours(0, 0, 0, 0);
 
+/** Newer activity than the last poll saw means the user fed the pet */
+export const detectFeed = (seenAt: number | undefined, latest: number | null) =>
+  seenAt !== undefined && latest !== null && latest > seenAt;
+
 export function toPetInputs(
   data: PollData,
   ctx: { now: number; connectedAt: number | null; lastFedAt?: number },

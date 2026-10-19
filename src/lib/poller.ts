@@ -1,5 +1,5 @@
 import { ApiError, graphql } from './api/client';
-import { pollVariables, toPetInputs, type PollData } from './api/poll';
+import { detectFeed, pollVariables, toPetInputs, type PollData } from './api/poll';
 import { POLL_QUERY } from './api/queries';
 import { fetchAccount, getAccount } from './auth/flow';
 import { tokenManager } from './auth/tokens';
@@ -7,6 +7,7 @@ import { computePetState, type PetState } from './pet/state';
 
 export interface PollMeta {
   lastPollAt?: number;
+  lastAttemptAt?: number;
   error?: string;
   rateLimitedUntil?: number;
 }
@@ -40,14 +41,21 @@ async function run() {
       await browser.storage.local.set({ account });
     }
     const data = await graphql<PollData>(POLL_QUERY, pollVariables(now, account.organizationId));
-    const stored = (await browser.storage.local.get(['connectedAt', 'lastFedAt'])) as {
+    const stored = (await browser.storage.local.get(['connectedAt', 'lastFedAt', 'seenAt'])) as {
       connectedAt?: number;
       lastFedAt?: number;
+      seenAt?: number;
     };
-    const petState: PetState = computePetState(
-      toPetInputs(data, { now, connectedAt: stored.connectedAt ?? null, lastFedAt: stored.lastFedAt }),
-    );
-    await browser.storage.local.set({ petState, pollMeta: { lastPollAt: now } satisfies PollMeta });
+    const inputs = toPetInputs(data, { now, connectedAt: stored.connectedAt ?? null, lastFedAt: stored.lastFedAt });
+    if (detectFeed(stored.seenAt, inputs.lastActivityAt)) inputs.lastFedAt = now;
+    const petState: PetState = computePetState(inputs);
+    await browser.storage.local.set({
+      petState,
+      lastFedAt: inputs.lastFedAt,
+      // max: deleting the newest item must not make the next older one look new
+      seenAt: Math.max(stored.seenAt ?? 0, inputs.lastActivityAt ?? 0) || undefined,
+      pollMeta: { lastPollAt: now, lastAttemptAt: now } satisfies PollMeta,
+    });
   } catch (err) {
     // A disconnect mid-poll leaves nothing to report
     if (!(await tokenManager.isConnected())) return;
@@ -56,6 +64,12 @@ async function run() {
       err instanceof ApiError && err.status === 429
         ? Date.now() + (err.retryAfterSec ?? DEFAULT_BACKOFF_SEC) * 1000
         : undefined;
-    await setMeta({ ...meta, error: message, rateLimitedUntil });
+    await setMeta({ ...meta, error: message, rateLimitedUntil, lastAttemptAt: now });
   }
+}
+
+/** Tabs nudge a refresh when they become visible; throttled so they can't burn the rate limit */
+export async function pollIfStale(minIntervalMs: number): Promise<void> {
+  const { lastAttemptAt } = await getMeta();
+  if (lastAttemptAt === undefined || Date.now() - lastAttemptAt >= minIntervalMs) await pollOnce();
 }

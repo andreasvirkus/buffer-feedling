@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { pollVariables, toPetInputs, type PollData } from './poll';
+import { detectFeed, pollVariables, toPetInputs, type PollData } from './poll';
 
 const NOW = new Date(2026, 9, 20, 15).getTime();
 const HOUR = 3600_000;
@@ -72,5 +72,17 @@ describe('pollVariables', () => {
     expect(v.org).toBe('org1');
     expect(Date.parse(v.sentSince)).toBe(NOW - 7 * 24 * HOUR);
     expect(Date.parse(v.createdSince)).toBe(NOW - 3 * 24 * HOUR);
+  });
+});
+
+describe('detectFeed', () => {
+  it('fires only when something newer than the last poll appears', () => {
+    expect(detectFeed(100, 101)).toBe(true);
+    expect(detectFeed(100, 100)).toBe(false);
+    expect(detectFeed(100, 50)).toBe(false);
+  });
+  it('never fires on the first poll or with no activity', () => {
+    expect(detectFeed(undefined, 101)).toBe(false);
+    expect(detectFeed(100, null)).toBe(false);
   });
 });
