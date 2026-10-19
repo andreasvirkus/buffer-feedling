@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Buffer Feedling</title>
+    <meta name="description" content="A browser extension with a pixel pet that gets fed by your Buffer activity." />
+    <meta property="og:title" content="Buffer Feedling" />
+    <meta property="og:description" content="Post more. Feed the blob. A pixel pet that lives on your Buffer activity." />
+    <meta property="og:image" content="og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="favicon.png" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="top">
+      <a class="brand" href="#top"><img src="favicon.png" alt="" width="32" height="32" />Buffer Feedling</a>
+      <nav aria-label="Primary">
+        <a href="#moods">Moods</a>
+        <a href="#install">Install</a>
+        <a href="https://github.com/andreasvirkus/buffer-feedling">GitHub</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-copy">
+          <h1>Post more. Feed the blob.</h1>
+          <p class="lede">
+            Buffer Feedling is a browser extension with a tiny pixel pet called Sproutling. It lives in the corner of
+            your Buffer app and gets fed by what you publish.
+          </p>
+          <p class="cta">
+            <a class="button primary" href="#install">Get the extension</a>
+            <a class="button" href="https://github.com/andreasvirkus/buffer-feedling">See the code</a>
+          </p>
+        </div>
+
+        <div class="stage">
+          <div class="stage-pet">
+            <canvas id="hero-pet" role="img" aria-label="Sproutling, the pixel pet"></canvas>
+          </div>
+          <p id="hero-caption" class="caption" aria-live="polite">Sproutling is content.</p>
+          <div class="switcher" role="group" aria-label="Preview a mood">
+            <button type="button" data-mood="hungry">Hungry</button>
+            <button type="button" data-mood="idle" aria-pressed="true">Content</button>
+            <button type="button" data-mood="full">Full</button>
+            <button type="button" data-mood="sleepy">Sleepy</button>
+            <button type="button" data-mood="eating">Eating</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="how" aria-labelledby="how-h">
+        <h2 id="how-h">How it works</h2>
+        <ol class="steps">
+          <li>
+            <h3>Connect Buffer</h3>
+            <p>Sign in once with Buffer's own OAuth screen. The extension asks to read your account, posts and ideas, and nothing else.</p>
+          </li>
+          <li>
+            <h3>Sproutling checks in</h3>
+            <p>Every 15 minutes it looks at your posting goals, what you've sent, what's scheduled, and any new drafts or ideas.</p>
+          </li>
+          <li>
+            <h3>Its mood follows your habit</h3>
+            <p>Hit your goals and it's full. Let the queue run dry and it gets hungry. Scheduled posts keep it calm, because food is on the way.</p>
+          </li>
+          <li>
+            <h3>It tags along</h3>
+            <p>It sits in the corner of the Buffer app, and visits the sites of the channels you've connected once you say it can.</p>
+          </li>
+        </ol>
+      </section>
+
+      <section id="moods" class="moods" aria-labelledby="moods-h">
+        <h2 id="moods-h">Five moods</h2>
+        <p class="sub">It never dies. The worst that happens is a nap.</p>
+        <ul class="mood-grid">
+          <li>
+            <canvas data-pet="hungry" role="img" aria-label="Hungry Sproutling"></canvas>
+            <h3>Hungry</h3>
+            <p>You've been around, but you're behind on your goals. A post would help.</p>
+          </li>
+          <li>
+            <canvas data-pet="idle" role="img" aria-label="Content Sproutling"></canvas>
+            <h3>Content</h3>
+            <p>Partway to your goals, or posts are scheduled. Nothing to worry about.</p>
+          </li>
+          <li>
+            <canvas data-pet="full" role="img" aria-label="Full Sproutling"></canvas>
+            <h3>Full</h3>
+            <p>Goals hit. Drafts take the edge off a little, but they don't count as dinner.</p>
+          </li>
+          <li>
+            <canvas data-pet="sleepy" role="img" aria-label="Sleepy Sproutling"></canvas>
+            <h3>Sleepy</h3>
+            <p>Three quiet days. It wakes up the moment you do something.</p>
+          </li>
+          <li>
+            <canvas data-pet="eating" role="img" aria-label="Eating Sproutling"></canvas>
+            <h3>Eating</h3>
+            <p>A new post, draft or idea just showed up. Lasts a few seconds.</p>
+          </li>
+        </ul>
+      </section>
+
+      <section class="privacy" aria-labelledby="privacy-h">
+        <h2 id="privacy-h">What it can see</h2>
+        <ul class="checks">
+          <li>Read-only access: <code>account:read</code>, <code>posts:read</code>, <code>ideas:read</code>.</li>
+          <li>No server of ours. The extension talks to Buffer's API directly from your browser.</li>
+          <li>Your tokens stay in the extension's background worker, never in the pages it visits.</li>
+          <li>It never posts, edits or deletes anything.</li>
+        </ul>
+      </section>
+
+      <section id="install" class="install" aria-labelledby="install-h">
+        <h2 id="install-h">Install</h2>
+        <p class="sub">
+          The Chrome Web Store listing is on its way. Until then, you can run it from source in about a minute.
+        </p>
+        <ol class="steps compact">
+          <li>
+            <p>Clone the repo and build it:</p>
+            <pre><code>git clone https://github.com/andreasvirkus/buffer-feedling
+cd buffer-feedling
+corepack enable &amp;&amp; pnpm install &amp;&amp; pnpm build</code></pre>
+          </li>
+          <li>
+            <p>
+              Open <code>chrome://extensions</code>, turn on <strong>Developer mode</strong>, choose <strong>Load unpacked</strong>
+              and pick <code>.output/chrome-mv3</code>.
+            </p>
+          </li>
+          <li><p>Click the Feedling icon in the toolbar and connect Buffer.</p></li>
+        </ol>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        Made for <strong>Buffer Commit</strong> by <a href="https://andreasvirkus.me">Andreas</a>. An independent project,
+        built on Buffer's public API.
+      </p>
+      <p><a href="https://github.com/andreasvirkus/buffer-feedling">Source on GitHub</a></p>
+    </footer>
+
+    <script type="module" src="main.js"></script>
+  </body>
+</html>

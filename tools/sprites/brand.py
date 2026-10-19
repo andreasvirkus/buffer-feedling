@@ -14,6 +14,7 @@ MUTED = (110, 98, 90)
 
 ICONS = ROOT / "src" / "public" / "icons"
 BRAND = ROOT / "docs" / "brand"
+SITE = ROOT / "site"
 
 
 def font(names, size):
@@ -52,6 +53,8 @@ def build_icons():
     for size in (48, 16):
         big.resize((size, size), Image.LANCZOS).save(ICONS / f"{size}.png")
     icon(512, 15).save(BRAND / "icon-512.png")
+    SITE.mkdir(exist_ok=True)
+    icon(32, 1).save(SITE / "favicon.png")
 
 
 def build_banner():
@@ -80,6 +83,8 @@ def build_banner():
 
     BRAND.mkdir(parents=True, exist_ok=True)
     img.convert("RGB").save(BRAND / "banner.png")
+    SITE.mkdir(exist_ok=True)
+    img.convert("RGB").save(SITE / "og.png")
 
 
 if __name__ == "__main__":

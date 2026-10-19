@@ -57,6 +57,8 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python brand.py    # extension icons, 512px logo, README banner
 ```
 
+`draw.py` also copies the sheets into `site/sprites/`, so the landing page stays self-contained. To preview it, run `npx serve site`.
+
 `tools/sprites/preview.html` plays a sheet in the browser. Serve the repo root (`npx serve .`) and open `/tools/sprites/preview.html`.
 
 ## Layout
@@ -70,6 +72,7 @@ src/
     pet/         computePetState and friends (pure, tested)
     overlay/     shadow-root host, canvas sprite player
   public/        sprites and icons, copied into the build
+site/            static landing page (plain HTML/CSS/JS, deploys as-is)
 tools/sprites/   Python sprite and brand generators
 docs/brand/      banner and logo
 ```

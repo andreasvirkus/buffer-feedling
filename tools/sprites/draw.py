@@ -294,6 +294,7 @@ def concept_sheet(out):
 
 ROOT = Path(__file__).resolve().parents[2]
 SPRITES = ROOT / "src" / "public" / "sprites"
+SITE_SPRITES = ROOT / "site" / "sprites"
 PREVIEW = Path(__file__).resolve().parent / "preview"
 PREVIEW_BG = (206, 226, 188)
 
@@ -361,6 +362,10 @@ def build_all():
         if has_blink:
             meta["blink"] = {"x": (len(frames) - 1) * N, "everyMs": BLINK_EVERY_MS, "ms": BLINK_MS}
         (SPRITES / f"sproutling-{name}.json").write_text(json.dumps(meta, indent=2) + "\n")
+        # The landing page ships its own copy so it deploys standalone
+        SITE_SPRITES.mkdir(parents=True, exist_ok=True)
+        sheet.save(SITE_SPRITES / f"sproutling-{name}-sheet.png")
+        (SITE_SPRITES / f"sproutling-{name}.json").write_text(json.dumps(meta, indent=2) + "\n")
 
         # Review GIF: idle runs to the blink interval then blinks; the rest loop to ~2s
         cycle_ms = sum(ms for _, ms in spec)
