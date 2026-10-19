@@ -2,6 +2,7 @@ import { defineConfig } from 'wxt';
 
 export default defineConfig({
   srcDir: 'src',
+  publicDir: 'src/public',
   manifest: {
     name: 'Buffer Feedling',
     description: 'A pixel pet fed by your Buffer activity.',

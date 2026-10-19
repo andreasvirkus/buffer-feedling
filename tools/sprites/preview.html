@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sproutling idle preview</title>
+    <style>
+      body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #cee2bc; }
+      canvas { image-rendering: pixelated; }
+    </style>
+  </head>
+  <body>
+    <canvas id="c" role="img" aria-label="Sproutling, idling"></canvas>
+    <script type="module">
+      // Serve from the repo root: npx serve .  →  /tools/sprites/preview.html
+      const BASE = '../../src/public/sprites/sproutling-idle';
+      const SCALE = 4;
+
+      const [meta, sheet] = await Promise.all([
+        fetch(`${BASE}.json`).then((r) => r.json()),
+        new Promise((res, rej) => {
+          const img = new Image();
+          img.onload = () => res(img);
+          img.onerror = rej;
+          img.src = `${BASE}-sheet.png`;
+        }),
+      ]);
+
+      const size = meta.frameSize;
+      const canvas = document.getElementById('c');
+      canvas.width = size * SCALE;
+      canvas.height = size * SCALE;
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+
+      const draw = (x) => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(sheet, x, 0, size, size, 0, 0, canvas.width, canvas.height);
+      };
+
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+      let timer = 0;
+      let frame = 0;
+      let nextBlinkAt = performance.now() + meta.blink.everyMs;
+
+      function tick() {
+        const now = performance.now();
+        if (now >= nextBlinkAt) {
+          nextBlinkAt = now + meta.blink.everyMs;
+          draw(meta.blink.x);
+          timer = setTimeout(tick, meta.blink.ms);
+          return;
+        }
+        const f = meta.frames[frame];
+        draw(f.x);
+        frame = (frame + 1) % meta.frames.length;
+        timer = setTimeout(tick, f.ms);
+      }
+
+      function sync() {
+        clearTimeout(timer);
+        if (reduced.matches) return draw(meta.frames[0].x);
+        if (!document.hidden) {
+          nextBlinkAt = performance.now() + meta.blink.everyMs;
+          tick();
+        }
+      }
+
+      document.addEventListener('visibilitychange', sync);
+      reduced.addEventListener('change', sync);
+      sync();
+    </script>
+  </body>
+</html>

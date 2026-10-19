@@ -6,3 +6,5 @@ stats.html
 .env*
 web-ext.config.ts
 .venv
+__pycache__
+.DS_Store
