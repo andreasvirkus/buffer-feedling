@@ -39,7 +39,7 @@ To load a build by hand: `chrome://extensions`, enable Developer mode, **Load un
 
 Connecting needs a public app client in Buffer (Settings, API, App Clients):
 
-- Public client with PKCE, scopes `account:read posts:read ideas:read`.
+- Public client with PKCE, scopes `account:read posts:read ideas:read`, plus `offline_access` so the session can refresh.
 - Redirect URI: `https://<extension-id>.chromiumapp.org/`. The manifest pins the public key, so the ID is the same on every machine. Check `chrome://extensions` for it.
 - The client ID lives in `src/lib/config.ts`. It's public by design.
 - The token endpoint checks the request `Origin`, so the extension's `chrome-extension://<id>` origin has to be allowed for the client.
