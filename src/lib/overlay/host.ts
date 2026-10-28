@@ -1,7 +1,7 @@
-const TAG = 'buffer-feedling';
+export const OVERLAY_TAG = 'buffer-feedling';
 
 export function mountOverlay(): ShadowRoot {
-  const host = document.createElement(TAG);
+  const host = document.createElement(OVERLAY_TAG);
   const root = host.attachShadow({ mode: 'closed' });
   document.documentElement.append(host);
 
