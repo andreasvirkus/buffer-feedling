@@ -71,7 +71,7 @@ def build_banner():
 
     OY = 36  # centres the block vertically
     d.text((W // 2, 105 + OY), "Sproutling", font=font(TITLE_FONT, 92), fill=OUT, anchor="mm")
-    d.text((W // 2, 185 + OY), "Keep your streak. Come up for air.", font=font(BODY_FONT, 36), fill=MUTED, anchor="mm")
+    d.text((W // 2, 185 + OY), "Post a little. Pause a little.", font=font(BODY_FONT, 36), fill=MUTED, anchor="mm")
 
     moods = ["hungry", "idle", "full", "sleepy", "eating"]
     labels = ["hungry", "content", "full", "sleepy", "eating"]
@@ -247,7 +247,7 @@ def promo_small():
     shadowed(img, d, 24 + 20, 56 + 14, 4)
     avail = 440 - 212 - 16
     d.text((212, 112), "Sproutling", font=fit(d, "Sproutling", TITLE_FONT, 40, avail), fill=OUT, anchor="lm")
-    for i, line in enumerate(("Keep your streak.", "Come up for air.")):
+    for i, line in enumerate(("Post a little.", "Pause a little.")):
         d.text((212, 156 + i * 28), line, font=fit(d, line, BODY_FONT, 22, avail), fill=MUTED, anchor="lm")
     return img
 
