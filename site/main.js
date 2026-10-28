@@ -90,7 +90,7 @@ for (const b of buttons) {
 }
 
 for (const canvas of document.querySelectorAll('canvas[data-pet]')) {
-  player(canvas, 4).set(canvas.dataset.pet);
+  player(canvas, Number(canvas.dataset.scale) || 4).set(canvas.dataset.pet);
 }
 
 player(document.getElementById('nudge-pet'), 6).set('idle');

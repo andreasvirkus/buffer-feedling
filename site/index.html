@@ -35,11 +35,25 @@
       <section class="hero">
         <div class="hero-copy">
           <h1>Keep showing up; but come back for air.</h1>
-          <p class="lede">
-            <em>Sproutling</em> is a tiny pixel pet that keeps you company in your browser. It's fed by what you post on
-            Buffer, but gets peckish if you don&apos;t feed it new post ideas every once in a while. When it notices you mindlessly scrolling
-            for a little too long, it has a kind word for you: stretch, sip some water, reflect on what you've consumed.
-          </p>
+          <div class="lede">
+            <p class="lede-main"><em>Sproutling</em> is a tiny pixel pet that keeps you company in your browser.</p>
+            <ul class="beats">
+              <li class="beat">
+                <canvas data-pet="hungry" data-scale="2" role="img" aria-label="A hungry Sproutling"></canvas>
+                <p>
+                  It's fed by what you post on Buffer, but gets peckish if you don&apos;t feed it new post ideas every once in a
+                  while.
+                </p>
+              </li>
+              <li class="beat">
+                <canvas data-pet="idle" data-scale="2" role="img" aria-label="Sproutling with something to say"></canvas>
+                <p class="speech">
+                  When it notices you mindlessly scrolling for a little too long, it has a kind word for you: stretch, sip
+                  some water, reflect on what you've consumed.
+                </p>
+              </li>
+            </ul>
+          </div>
           <p class="cta">
             <a class="button primary" href="#install">Get the extension</a>
             <a class="button" href="https://github.com/andreasvirkus/buffer-feedling">See the code</a>
