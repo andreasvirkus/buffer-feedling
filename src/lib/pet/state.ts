@@ -85,4 +85,4 @@ export const displayMood = (s: PetState, now: number): Mood =>
 export const spriteName = (m: Mood): string => (m === 'content' ? 'idle' : m);
 
 export const petLabel = (s: PetState | undefined, mood: Mood): string =>
-  s ? `Buffer Feedling: ${mood}, ${s.sent} of ${s.target} posts this week` : 'Buffer Feedling: waiting to be connected';
+  s ? `Sproutling: ${mood}, ${s.sent} of ${s.target} posts this week` : 'Sproutling: waiting to be connected';

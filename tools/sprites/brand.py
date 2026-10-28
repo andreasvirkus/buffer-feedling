@@ -70,7 +70,7 @@ def build_banner():
     d = ImageDraw.Draw(img)
 
     OY = 36  # centres the block vertically
-    d.text((W // 2, 105 + OY), "Buffer Feedling", font=font(TITLE_FONT, 92), fill=OUT, anchor="mm")
+    d.text((W // 2, 105 + OY), "Sproutling", font=font(TITLE_FONT, 92), fill=OUT, anchor="mm")
     d.text((W // 2, 185 + OY), "A pixel pet fed by your Buffer activity", font=font(BODY_FONT, 36), fill=MUTED, anchor="mm")
 
     moods = ["hungry", "idle", "full", "sleepy", "eating"]
@@ -204,7 +204,7 @@ def shot_sites():
     x0, y0, x1, y1 = 700, 110, 1180, 690
     pixel_card(d, [x0, y0, x1, y1], offset=8)
     img.alpha_composite(sprite_at("idle", 3), (x0 + 28, y0 + 26))
-    d.text((x0 + 140, y0 + 64), "Feedling", font=font(TITLE_FONT, 36), fill=OUT, anchor="lm")
+    d.text((x0 + 140, y0 + 64), "Sproutling", font=font(TITLE_FONT, 36), fill=OUT, anchor="lm")
     d.rounded_rectangle([x0 + 140, y0 + 96, x0 + 250, y0 + 128], radius=16, fill=MINT)
     d.text((x0 + 195, y0 + 112), "Content", font=font(BODY_FONT, 20), fill=ACCENT, anchor="mm")
     d.rounded_rectangle([x0 + 28, y0 + 168, x1 - 28, y0 + 268], radius=14, fill=(246, 249, 244), outline=LINE, width=2)
@@ -226,7 +226,7 @@ def shot_sites():
         if on:
             d.line([(cx + 16, cy + 23), (cx + 23, cy + 30), (cx + 36, cy + 14)], fill=ACCENT, width=4, joint="curve")
         cx += w + 12
-    d.text((x0 + 28, y0 + 500), "Tap a channel to let Feedling visit its site.", font=font(BODY_FONT, 21), fill=MUTED, anchor="lm")
+    d.text((x0 + 28, y0 + 500), "Tap a channel to let Sproutling visit its site.", font=font(BODY_FONT, 21), fill=MUTED, anchor="lm")
     return img
 
 

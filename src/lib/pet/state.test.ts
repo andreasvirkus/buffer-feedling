@@ -136,7 +136,7 @@ describe('spriteName / petLabel', () => {
   });
   it('describes progress, and the not-connected case', () => {
     const s = run({ goals: [goal(5, 2)] });
-    expect(petLabel(s, 'content')).toBe('Buffer Feedling: content, 2 of 5 posts this week');
+    expect(petLabel(s, 'content')).toBe('Sproutling: content, 2 of 5 posts this week');
     expect(petLabel(undefined, 'sleepy')).toContain('waiting');
   });
 });

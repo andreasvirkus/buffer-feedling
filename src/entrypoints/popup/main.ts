@@ -96,7 +96,7 @@ async function render() {
         'div',
         { className: 'hero' },
         sprite('sleepy'),
-        h('div', {}, h('h1', { textContent: 'Feedling' }), h('p', { className: 'lede', textContent: 'Connect Buffer to wake your pet up.' })),
+        h('div', {}, h('h1', { textContent: 'Sproutling' }), h('p', { className: 'lede', textContent: 'Connect Buffer to wake your pet up.' })),
       ),
       button('Connect Buffer', () => act('CONNECT'), true),
     );
@@ -116,7 +116,7 @@ async function render() {
         'div',
         { className: 'hero' },
         sprite(mood),
-        h('div', {}, h('h1', { textContent: 'Feedling' }), h('span', { className: 'chip', textContent: mood, attrs: { 'data-mood': mood } })),
+        h('div', {}, h('h1', { textContent: 'Sproutling' }), h('span', { className: 'chip', textContent: mood, attrs: { 'data-mood': mood } })),
       ),
       h(
         'div',
@@ -151,7 +151,7 @@ async function render() {
         ),
       );
       if (petState.connectedServices.some(isVisitable)) {
-        nodes.push(h('p', { className: 'hint', textContent: 'Tap a channel to let Feedling visit its site. Tap again to stop.' }));
+        nodes.push(h('p', { className: 'hint', textContent: 'Tap a channel to let Sproutling visit its site. Tap again to stop.' }));
       }
     }
     nodes.push(nudgeToggle(nudgesOn));
@@ -162,7 +162,7 @@ async function render() {
         'div',
         { className: 'hero' },
         sprite('sleepy'),
-        h('div', {}, h('h1', { textContent: 'Feedling' }), h('p', { className: 'lede', textContent: 'Warming up…' })),
+        h('div', {}, h('h1', { textContent: 'Sproutling' }), h('p', { className: 'lede', textContent: 'Warming up…' })),
       ),
       h('p', { className: 'foot', textContent: `Connected as ${status.account?.name ?? 'your Buffer account'}` }),
     );

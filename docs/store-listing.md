@@ -4,7 +4,7 @@ Copy and answers to paste into the Developer Dashboard. Assets are in `docs/stor
 
 ## Store listing tab
 
-**Name**: Buffer Feedling
+**Name**: Sproutling
 
 **Summary** (from the manifest, 113 of 132 characters):
 A pixel pet fed by your Buffer posts. It follows you around and gently nudges you to share instead of doomscroll.
@@ -35,7 +35,7 @@ PRIVACY
 
 Everything stays in your browser. There is no server of ours and no analytics. It never posts, edits or deletes anything in your account, and it never records or sends what's on the pages you visit. The full policy is at https://sproutling.pet/privacy
 
-Buffer Feedling is an independent project, built on Buffer's public API for the Buffer Commit contest. The code is open source: https://github.com/andreasvirkus/buffer-feedling
+Sproutling is an independent project, built on Buffer's public API for the Buffer Commit contest. The code is open source: https://github.com/andreasvirkus/buffer-feedling
 ```
 
 **Website**: https://sproutling.pet
@@ -85,4 +85,4 @@ Both stay in the browser's extension storage and are sent only to Buffer. Leave 
 2. **Check the extension ID the store assigns.** The sign-in and refresh pages hard-code `ecmbcebdlcbhgggjgdnokhlllblbongm` (`site/callback.js`, `site/refresh.js`). If the store gives a different ID, update both files and the Buffer redirect settings. If the dashboard shows a public key for the item, putting it in the manifest `key` keeps the ID stable for local testing.
 3. Test the packaged build from a clean profile: connect, refresh (wait for a token to expire), allow a channel site, scroll for a nudge, drag, nap, disconnect.
 4. Re-read the Privacy tab answers against the manifest before submitting.
-5. "Buffer" is a trademark in the name. Check with the team that publishing under it is fine.
+5. The name is just "Sproutling", but the summary and description mention Buffer. That is descriptive use; check with the team if unsure.

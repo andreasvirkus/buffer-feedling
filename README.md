@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="docs/brand/banner.png" alt="Buffer Feedling: a pixel pet in five moods" width="720" />
+  <img src="docs/brand/banner.png" alt="Sproutling: a pixel pet in five moods" width="720" />
 </p>
 
-# Buffer Feedling
+# Sproutling
 
 A pixel pet that lives in your browser and gets fed by your Buffer activity. Send a post and it perks up. Let the queue run dry and it gets hungry. Ignore it for a few days and it takes a nap (it never dies, we're not monsters).
 

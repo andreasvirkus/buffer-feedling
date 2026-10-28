@@ -25,7 +25,7 @@ async function main() {
   history.replaceState(null, '', location.pathname);
 
   if (!globalThis.chrome?.runtime?.sendMessage) {
-    return say('Open this in Chrome', 'This page connects the Buffer Feedling extension, which needs a Chromium browser with the extension installed.');
+    return say('Open this in Chrome', 'This page connects the Sproutling extension, which needs a Chromium browser with the extension installed.');
   }
   if (!state) return say('Nothing to connect', 'Start from the extension: open it and press Connect Buffer.');
 
