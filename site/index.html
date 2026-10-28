@@ -17,6 +17,7 @@
     <header class="top">
       <a class="brand" href="#top"><img src="favicon.png" alt="" width="32" height="32" />Buffer Feedling</a>
       <nav aria-label="Primary">
+        <a href="#features">Features</a>
         <a href="#moods">Moods</a>
         <a href="#install">Install</a>
         <a href="https://github.com/andreasvirkus/buffer-feedling">GitHub</a>
@@ -29,7 +30,7 @@
           <h1>Post more. Feed the blob.</h1>
           <p class="lede">
             Buffer Feedling is a browser extension with a tiny pixel pet called Sproutling. It lives in the corner of
-            your Buffer app and gets fed by what you publish.
+            your Buffer app and your channels' sites, and gets fed by what you publish.
           </p>
           <p class="cta">
             <a class="button primary" href="#install">Get the extension</a>
@@ -69,9 +70,64 @@
           </li>
           <li>
             <h3>It tags along</h3>
-            <p>It sits in the corner of the Buffer app, and visits the sites of the channels you've connected once you say it can.</p>
+            <p>It sits in the corner of the Buffer app, and visits the sites of the channels you've connected, one site at a time, only when you say it can.</p>
           </li>
         </ol>
+      </section>
+
+      <section id="features" class="features" aria-labelledby="features-h">
+        <h2 id="features-h">What it does</h2>
+        <p class="sub">A pet that cheers you on, and a gentle voice for when the scrolling goes on a bit long.</p>
+
+        <div class="nudge-demo">
+          <canvas id="nudge-pet" role="img" aria-label="Sproutling with a speech bubble"></canvas>
+          <div class="speech" id="nudge-line" role="status" aria-live="polite">Saw anything you’d want to share with others?</div>
+          <button type="button" id="nudge-next" class="button">Another nudge</button>
+        </div>
+
+        <h3 class="group">Ready now</h3>
+        <ul class="feature-grid">
+          <li>
+            <h3>Lives on Buffer</h3>
+            <p>A pixel pet in the corner of your Buffer app, with five moods and little animations for each.</p>
+          </li>
+          <li>
+            <h3>Visits your channels</h3>
+            <p>Tap a connected channel in the popup and Sproutling shows up on that site too: LinkedIn, X, Instagram, Bluesky and more. One site at a time, and you can take it back whenever.</p>
+          </li>
+          <li>
+            <h3>Gentle nudges</h3>
+            <p>Scroll for a long while and Sproutling pipes up in a speech bubble: “Let’s pause and reflect on what we’ve consumed.” It starts chatty, then eases off. There’s a switch if you’d rather it stayed quiet.</p>
+          </li>
+          <li>
+            <h3>Put it anywhere</h3>
+            <p>Drag it wherever it’s out of the way. It remembers the spot for each site, and keyboard users can move it with the arrow keys.</p>
+          </li>
+          <li>
+            <h3>A little panel</h3>
+            <p>Click Sproutling for how it’s feeling, a one-click way back to Buffer, and a nap button for when you want it to settle down.</p>
+          </li>
+          <li>
+            <h3>Eats on arrival</h3>
+            <p>When a new post, draft or idea shows up, Sproutling munches for a few seconds. That’s the whole reward system.</p>
+          </li>
+        </ul>
+
+        <h3 class="group">Coming up</h3>
+        <ul class="feature-grid soon">
+          <li>
+            <h3>Chrome Web Store <span class="badge">Soon</span></h3>
+            <p>One-click install, plus a plain-language privacy page to go with it.</p>
+          </li>
+          <li>
+            <h3>Smoother first run <span class="badge">Planned</span></h3>
+            <p>Friendlier empty states for brand-new accounts, and more polish on the popup.</p>
+          </li>
+          <li>
+            <h3>More to say <span class="badge">Planned</span></h3>
+            <p>A bigger bag of kind words, and a short walkthrough video.</p>
+          </li>
+        </ul>
       </section>
 
       <section id="moods" class="moods" aria-labelledby="moods-h">
@@ -113,6 +169,7 @@
           <li>No server of ours. The extension talks to Buffer's API directly from your browser.</li>
           <li>Your tokens are kept in the extension's background worker, never in the pages it visits. The sign-in page on this site only passes them along once.</li>
           <li>It never posts, edits or deletes anything.</li>
+          <li>It only visits a channel's site after you allow that site in your browser's permission prompt. The pet never reads what's on the page.</li>
         </ul>
       </section>
 

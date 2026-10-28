@@ -92,3 +92,22 @@ for (const b of buttons) {
 for (const canvas of document.querySelectorAll('canvas[data-pet]')) {
   player(canvas, 4).set(canvas.dataset.pet);
 }
+
+player(document.getElementById('nudge-pet'), 6).set('idle');
+
+const NUDGES = [
+  'Saw anything you’d want to share with others?',
+  'Let’s pause and reflect on what we’ve consumed.',
+  'Did that last stretch feed you, or just fill you?',
+  'Shoulders down, jaw unclenched. Sip of water?',
+  'Look at something far away for a moment. Your eyes will thank you.',
+  'You’ve come a long way down the page. Want to come up for air?',
+  'Is there something you’d rather make than scroll? I’d happily watch.',
+  'How’s your brain feeling: full, or snacking on crumbs?',
+];
+const line = document.getElementById('nudge-line');
+let nudge = 0;
+document.getElementById('nudge-next').addEventListener('click', () => {
+  nudge = (nudge + 1) % NUDGES.length;
+  line.textContent = NUDGES[nudge];
+});
