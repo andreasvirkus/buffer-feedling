@@ -57,7 +57,7 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python brand.py    # extension icons, 512px logo, README banner
 ```
 
-`draw.py` also copies the sheets into `site/sprites/`, so the landing page stays self-contained. To preview it, run `npx serve site`.
+`draw.py` also copies the sheets into `site/sprites/`, so the landing page stays self-contained. To preview it, run `pnpm site:dev`.
 
 `tools/sprites/preview.html` plays a sheet in the browser. Serve the repo root (`npx serve .`) and open `/tools/sprites/preview.html`.
 
