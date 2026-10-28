@@ -10,7 +10,8 @@ export default defineConfig({
     web_accessible_resources: [{ resources: ['sprites/*'], matches: ['*://publish.buffer.com/*'] }],
     // Lets the service worker call Buffer without CORS headers
     host_permissions: ['https://auth.buffer.com/*', 'https://api.buffer.com/*'],
-    permissions: ['storage', 'alarms', 'identity', 'scripting', 'contextMenus'],
+    permissions: ['storage', 'alarms', 'scripting', 'contextMenus'],
+    externally_connectable: { matches: ['https://buffer-feedling.pages.dev/*'] },
     optional_host_permissions: [
       '*://*.instagram.com/*',
       '*://*.facebook.com/*',

@@ -40,9 +40,9 @@ To load a build by hand: `chrome://extensions`, enable Developer mode, **Load un
 Connecting needs a public app client in Buffer (Settings, API, App Clients):
 
 - Public client with PKCE, scopes `account:read posts:read ideas:read`, plus `offline_access` so the session can refresh.
-- Redirect URI: `https://<extension-id>.chromiumapp.org/`. The manifest pins the public key, so the ID is the same on every machine. Check `chrome://extensions` for it.
+- Redirect URI: `https://buffer-feedling.pages.dev/callback.html` (the page in `site/`).
 - The client ID lives in `src/lib/config.ts`. It's public by design.
-- The token endpoint checks the request `Origin`, so the extension's `chrome-extension://<id>` origin has to be allowed for the client.
+- The token endpoint only accepts requests whose `Origin` matches a redirect URI's origin, and an extension's `chrome-extension://` origin can't be registered. So the callback page does the code exchange and hands the tokens to the extension (`externally_connectable`). The manifest pins the public key, so the extension ID the page talks to is the same on every machine.
 
 The private signing key is not in the repo. You only need it to publish to the Chrome Web Store.
 
@@ -80,7 +80,7 @@ docs/brand/      banner and logo
 ## Guiding principles
 
 - **One poller, one refresher.** Only the service worker talks to the API. Tabs read stored state. Refresh tokens rotate, so refresh is single-flight and the new token is saved before it's used.
-- **Tokens stay in the service worker.** Content scripts never get them, and never drive auth.
+- **Tokens live in the service worker.** Content scripts never get them, and never drive auth. The callback page only sees them for the moment between Buffer and the extension, and the extension checks the `state` it issued before accepting anything.
 - **Read-only, and gentle with the rate limit.** Minimal scopes. One aliased GraphQL request per poll, because the API allows roughly 100 requests per 15 minutes.
 - **Never block the host page.** The overlay wrapper ignores pointer events; only the pet itself catches them. It lives in a closed shadow root and puts itself back if a single-page app rips it out.
 - **Ask for permissions at the moment they make sense.** Social sites are optional host permissions, requested after connecting and only for the channels you have.

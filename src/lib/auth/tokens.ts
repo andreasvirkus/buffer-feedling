@@ -30,20 +30,17 @@ export async function requestTokens(params: Record<string, string>, now = Date.n
   if (!res.ok || json.error) {
     throw new OAuthError(json.error_description || json.error || `HTTP ${res.status}`, json.error);
   }
+  return tokensFromResponse(json, now);
+}
+
+export function tokensFromResponse(json: Record<string, unknown>, now = Date.now()): Tokens {
+  if (typeof json.access_token !== 'string') throw new OAuthError('Token response had no access_token');
   return {
     accessToken: json.access_token,
-    refreshToken: json.refresh_token ?? null,
+    refreshToken: typeof json.refresh_token === 'string' ? json.refresh_token : null,
     expiresAt: expiresAtFrom(now, Number(json.expires_in) || 3600),
   };
 }
-
-export const exchangeCode = (p: { code: string; verifier: string; redirectUri: string }) =>
-  requestTokens({
-    grant_type: 'authorization_code',
-    code: p.code,
-    redirect_uri: p.redirectUri,
-    code_verifier: p.verifier,
-  });
 
 export const refreshWith = (refreshToken: string) =>
   requestTokens({ grant_type: 'refresh_token', refresh_token: refreshToken });

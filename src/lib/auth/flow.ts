@@ -1,11 +1,14 @@
 import { graphql } from '../api/client';
 import { ACCOUNT_QUERY } from '../api/queries';
 import type { Account } from '../messages';
+import { CALLBACK_URL, CLIENT_ID, TOKEN_URL } from '../config';
+import type { CallbackMessage, CallbackReply } from '../messages';
+import { matchPending, type PendingAuth } from './pending';
 import { buildAuthorizeUrl, createPkcePair, createState } from './pkce';
-import { exchangeCode, tokenManager } from './tokens';
+import { tokenManager, tokensFromResponse } from './tokens';
 
 // Everything we persist besides tokens; wiped on disconnect
-const DERIVED_KEYS = ['account', 'petState', 'pollMeta', 'connectedAt', 'lastFedAt', 'seenAt'];
+const DERIVED_KEYS = ['account', 'petState', 'pollMeta', 'connectedAt', 'lastFedAt', 'seenAt', 'authError'];
 
 export async function fetchAccount(): Promise<Account> {
   const { account } = await graphql<{ account: { name: string | null; email: string; organizations: { id: string }[] } }>(
@@ -16,29 +19,51 @@ export async function fetchAccount(): Promise<Account> {
   return { name: account.name ?? account.email, email: account.email, organizationId: org.id };
 }
 
-export async function connect(): Promise<Account> {
-  const redirectUri = browser.identity.getRedirectURL();
+const PENDING_KEY = 'pendingAuth';
+
+async function getPending() {
+  return ((await browser.storage.session.get(PENDING_KEY))[PENDING_KEY] as PendingAuth | undefined) ?? undefined;
+}
+
+// Opens consent in a popup; the callback page on our site finishes the exchange (see handleCallbackMessage)
+export async function startConnect() {
   const { verifier, challenge } = await createPkcePair();
   const state = createState();
-
-  const responseUrl = await browser.identity.launchWebAuthFlow({
-    url: buildAuthorizeUrl({ redirectUri, state, challenge }),
-    interactive: true,
+  const url = buildAuthorizeUrl({ redirectUri: CALLBACK_URL, state, challenge });
+  await browser.storage.local.remove('authError');
+  const win = await browser.windows.create({ url, type: 'popup', width: 520, height: 760 });
+  await browser.storage.session.set({
+    [PENDING_KEY]: { state, verifier, startedAt: Date.now(), windowId: win?.id } satisfies PendingAuth,
   });
-  if (!responseUrl) throw new Error('Authorization cancelled');
+}
 
-  const params = new URL(responseUrl).searchParams;
-  if (params.get('error')) throw new Error(params.get('error_description') || params.get('error')!);
-  if (params.get('state') !== state) throw new Error('State mismatch');
-  const code = params.get('code');
-  if (!code) throw new Error('No authorization code returned');
+// Token requests need an https origin Buffer accepts, so the page does the exchange and hands the tokens back
+export async function handleCallbackMessage(msg: CallbackMessage): Promise<CallbackReply> {
+  const pending = matchPending(await getPending(), msg?.state, Date.now());
+  if (!pending) return { ok: false, error: 'No connection in progress' };
 
-  await tokenManager.save(await exchangeCode({ code, verifier, redirectUri }));
+  if (msg.type === 'AUTH_BEGIN') {
+    return { ok: true, verifier: pending.verifier, clientId: CLIENT_ID, redirectUri: CALLBACK_URL, tokenUrl: TOKEN_URL };
+  }
 
-  const account = await fetchAccount();
-  const { connectedAt } = await browser.storage.local.get('connectedAt');
-  await browser.storage.local.set({ account, connectedAt: connectedAt ?? Date.now() });
-  return account;
+  await browser.storage.session.remove(PENDING_KEY);
+  if (msg.type === 'AUTH_ERROR') {
+    await browser.storage.local.set({ authError: String(msg.error).slice(0, 300) });
+    return { ok: true };
+  }
+
+  try {
+    await tokenManager.save(tokensFromResponse(msg.tokens));
+    const account = await fetchAccount();
+    const { connectedAt } = await browser.storage.local.get('connectedAt');
+    await browser.storage.local.set({ account, connectedAt: connectedAt ?? Date.now() });
+  } catch (e) {
+    await tokenManager.disconnect();
+    await browser.storage.local.set({ authError: (e as Error).message });
+    return { ok: false, error: (e as Error).message };
+  }
+  if (pending.windowId !== undefined) await browser.windows.remove(pending.windowId).catch(() => {});
+  return { ok: true };
 }
 
 export async function disconnect() {

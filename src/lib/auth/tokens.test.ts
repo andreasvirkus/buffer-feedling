@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { OAuthError, createTokenManager, expiresAtFrom, isExpired, type TokenStore, type Tokens } from './tokens';
+import { OAuthError, createTokenManager, expiresAtFrom, isExpired, tokensFromResponse, type TokenStore, type Tokens } from './tokens';
 
 const memoryStore = (initial: Tokens | null): TokenStore & { value: Tokens | null } => {
   const s = {
@@ -83,4 +83,17 @@ describe('token manager', () => {
     await m.disconnect();
     expect(await m.isConnected()).toBe(false);
   });
+});
+
+describe('tokensFromResponse', () => {
+  it('maps a full response', () =>
+    expect(tokensFromResponse({ access_token: 'a', refresh_token: 'r', expires_in: 100 }, 0)).toEqual({
+      accessToken: 'a',
+      refreshToken: 'r',
+      expiresAt: 40_000,
+    }));
+  it('allows a missing refresh token', () =>
+    expect(tokensFromResponse({ access_token: 'a', expires_in: 100 }, 0).refreshToken).toBeNull());
+  it('rejects a response without an access token', () =>
+    expect(() => tokensFromResponse({ error: 'x' })).toThrow(OAuthError));
 });

@@ -8,11 +8,12 @@ let status: ConnectionStatus = { connected: false };
 let flash: string | undefined;
 
 async function readStored() {
-  const { petState, pollMeta } = (await browser.storage.local.get(['petState', 'pollMeta'])) as {
+  const { petState, pollMeta, authError } = (await browser.storage.local.get(['petState', 'pollMeta', 'authError'])) as {
     petState?: PetState;
     pollMeta?: PollMeta;
+    authError?: string;
   };
-  return { petState, pollMeta };
+  return { petState, pollMeta, authError };
 }
 
 const pct = (n: number) => `${Math.round(n * 100)}%`;
@@ -57,9 +58,10 @@ const sprite = (mood: Mood) =>
   );
 
 async function render() {
-  const { petState, pollMeta } = await readStored();
+  const { petState, pollMeta, authError } = await readStored();
   const nodes: Node[] = [];
 
+  if (authError && !status.connected) nodes.push(h('p', { className: 'banner', textContent: `Couldn't connect: ${authError}`, attrs: { role: 'alert' } }));
   if (flash) nodes.push(h('p', { className: 'banner', textContent: flash, attrs: { role: 'alert' } }));
 
   if (!status.connected) {
@@ -149,7 +151,13 @@ async function act(type: 'CONNECT' | 'DISCONNECT' | 'REFRESH_NOW') {
 }
 
 browser.storage.onChanged.addListener((changes, area) => {
-  if (area === 'local' && ('petState' in changes || 'pollMeta' in changes)) void render();
+  if (area !== 'local') return;
+  if ('account' in changes || 'authError' in changes) {
+    void send({ type: 'GET_STATUS' }).then((r) => {
+      if (r.ok) status = r.data;
+      return render();
+    });
+  } else if ('petState' in changes || 'pollMeta' in changes) void render();
 });
 
 send({ type: 'GET_STATUS' }).then((r) => {

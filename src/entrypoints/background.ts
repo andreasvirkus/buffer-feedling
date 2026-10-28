@@ -1,6 +1,7 @@
-import { connect, disconnect, getAccount } from '@/lib/auth/flow';
+import { disconnect, getAccount, handleCallbackMessage, startConnect } from '@/lib/auth/flow';
 import { tokenManager } from '@/lib/auth/tokens';
-import type { ConnectionStatus, Message, Reply } from '@/lib/messages';
+import { SITE_ORIGIN } from '@/lib/config';
+import type { CallbackMessage, CallbackReply, ConnectionStatus, Message, Reply } from '@/lib/messages';
 import { POLL_ALARM, POLL_MINUTES, pollIfStale, pollOnce } from '@/lib/poller';
 
 const HINT_MIN_INTERVAL_MS = 60_000;
@@ -12,10 +13,7 @@ async function status(): Promise<ConnectionStatus> {
 }
 
 async function handle(msg: Message): Promise<ConnectionStatus> {
-  if (msg.type === 'CONNECT') {
-    await connect();
-    await pollOnce();
-  }
+  if (msg.type === 'CONNECT') await startConnect();
   if (msg.type === 'DISCONNECT') await disconnect();
   if (msg.type === 'POLL_HINT') await pollIfStale(HINT_MIN_INTERVAL_MS);
   if (msg.type === 'REFRESH_NOW') {
@@ -34,6 +32,17 @@ export default defineBackground(() => {
   });
   browser.runtime.onStartup.addListener(() => void pollOnce());
   browser.runtime.onInstalled.addListener(() => void pollOnce());
+
+  browser.runtime.onMessageExternal.addListener((msg: CallbackMessage, sender, sendResponse) => {
+    if (sender.origin !== SITE_ORIGIN) return;
+    handleCallbackMessage(msg)
+      .then(async (reply) => {
+        if (msg.type === 'AUTH_TOKENS' && reply.ok) await pollOnce();
+        return reply;
+      })
+      .then(sendResponse, (e: Error): void => sendResponse({ ok: false, error: e.message } satisfies CallbackReply));
+    return true;
+  });
 
   browser.runtime.onMessage.addListener((msg: Message, sender, sendResponse) => {
     // Content scripts may only nudge a poll, never drive auth

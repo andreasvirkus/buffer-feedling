@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="robots" content="noindex" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Connecting Buffer Feedling</title>
+    <link rel="icon" href="favicon.png" />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .callback { min-height: 100svh; display: grid; place-content: center; justify-items: center; gap: 1rem; padding: 1.5rem; text-align: center; }
+      .callback canvas { image-rendering: pixelated; }
+    </style>
+  </head>
+  <body>
+    <main class="callback">
+      <canvas id="pet" width="128" height="128" aria-hidden="true"></canvas>
+      <h1 id="title">Connecting…</h1>
+      <p id="detail" role="status" aria-live="polite">Hang on while Sproutling shakes hands with Buffer.</p>
+    </main>
+    <script src="callback.js" type="module"></script>
+  </body>
+</html>
