@@ -6,6 +6,6 @@ export default defineContentScript({
   registration: 'runtime',
   matches: allSitePatterns(),
   main() {
-    if (window.top === window) return mountPet();
+    if (window.top === window) return mountPet({ nudges: true });
   },
 });

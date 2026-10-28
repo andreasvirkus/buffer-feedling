@@ -9,12 +9,13 @@ let status: ConnectionStatus = { connected: false };
 let flash: string | undefined;
 
 async function readStored() {
-  const { petState, pollMeta, authError } = (await browser.storage.local.get(['petState', 'pollMeta', 'authError'])) as {
-    petState?: PetState;
-    pollMeta?: PollMeta;
-    authError?: string;
-  };
-  return { petState, pollMeta, authError };
+  const { petState, pollMeta, authError, nudgesEnabled } = (await browser.storage.local.get([
+    'petState',
+    'pollMeta',
+    'authError',
+    'nudgesEnabled',
+  ])) as { petState?: PetState; pollMeta?: PollMeta; authError?: string; nudgesEnabled?: boolean };
+  return { petState, pollMeta, authError, nudgesOn: nudgesEnabled !== false };
 }
 
 const pct = (n: number) => `${Math.round(n * 100)}%`;
@@ -63,6 +64,18 @@ function siteChip(service: string, on: boolean): Node {
   return b;
 }
 
+function nudgeToggle(on: boolean) {
+  const input = h('input', { attrs: { type: 'checkbox', role: 'switch' } });
+  input.checked = on;
+  input.onchange = () => void browser.storage.local.set({ nudgesEnabled: input.checked });
+  return h(
+    'label',
+    { className: 'toggle' },
+    h('span', {}, h('strong', { textContent: 'Gentle nudges' }), h('small', { textContent: 'A kind word now and then when you scroll for a long while.' })),
+    input,
+  );
+}
+
 const sprite = (mood: Mood) =>
   h(
     'div',
@@ -71,7 +84,7 @@ const sprite = (mood: Mood) =>
   );
 
 async function render() {
-  const { petState, pollMeta, authError } = await readStored();
+  const { petState, pollMeta, authError, nudgesOn } = await readStored();
   const nodes: Node[] = [];
 
   if (authError && !status.connected) nodes.push(h('p', { className: 'banner', textContent: `Couldn't connect: ${authError}`, attrs: { role: 'alert' } }));
@@ -141,6 +154,7 @@ async function render() {
         nodes.push(h('p', { className: 'hint', textContent: 'Tap a channel to let Feedling visit its site. Tap again to stop.' }));
       }
     }
+    nodes.push(nudgeToggle(nudgesOn));
     nodes.push(h('p', { className: 'foot', textContent: `Connected as ${status.account?.name ?? 'your Buffer account'} · updated ${ago(petState.updatedAt)}` }));
   } else {
     nodes.push(

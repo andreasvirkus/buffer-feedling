@@ -34,7 +34,7 @@ export default defineBackground(() => {
   browser.runtime.onStartup.addListener(() => void pollOnce());
   browser.runtime.onInstalled.addListener(() => void pollOnce());
 
-  const sync = () => void syncPlatformScripts().catch(() => {});
+  const sync = () => void syncPlatformScripts().catch((e) => console.error('Feedling: registering site scripts failed', e));
   browser.runtime.onStartup.addListener(sync);
   browser.runtime.onInstalled.addListener(sync);
   browser.permissions.onAdded.addListener(sync);
