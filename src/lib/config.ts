@@ -3,5 +3,5 @@ export const AUTH_URL = 'https://auth.buffer.com/auth';
 export const TOKEN_URL = 'https://auth.buffer.com/token';
 export const API_URL = 'https://api.buffer.com';
 export const SCOPES = 'account:read posts:read ideas:read offline_access';
-export const SITE_ORIGIN = 'https://buffer-feedling.pages.dev';
+export const SITE_ORIGIN = 'https://sproutling.pet';
 export const CALLBACK_URL = `${SITE_ORIGIN}/callback.html`;

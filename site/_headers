@@ -1,3 +1,7 @@
+/callback
+  Referrer-Policy: no-referrer
+  Cache-Control: no-store
+
 /callback.html
   Referrer-Policy: no-referrer
   Cache-Control: no-store

@@ -11,7 +11,7 @@ export default defineConfig({
     // Lets the service worker call Buffer without CORS headers
     host_permissions: ['https://auth.buffer.com/*', 'https://api.buffer.com/*'],
     permissions: ['storage', 'alarms', 'scripting', 'contextMenus'],
-    externally_connectable: { matches: ['https://buffer-feedling.pages.dev/*'] },
+    externally_connectable: { matches: ['https://sproutling.pet/*'] },
     optional_host_permissions: allSitePatterns(),
   },
 });

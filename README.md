@@ -40,7 +40,7 @@ To load a build by hand: `chrome://extensions`, enable Developer mode, **Load un
 Connecting needs a public app client in Buffer (Settings, API, App Clients):
 
 - Public client with PKCE, scopes `account:read posts:read ideas:read`, plus `offline_access` so the session can refresh.
-- Redirect URI: `https://buffer-feedling.pages.dev/callback.html` (the page in `site/`).
+- Redirect URI: `https://sproutling.pet/callback.html` (the page in `site/`).
 - The client ID lives in `src/lib/config.ts`. It's public by design.
 - The token endpoint only accepts requests whose `Origin` matches a redirect URI's origin, and an extension's `chrome-extension://` origin can't be registered. So the callback page does the code exchange and hands the tokens to the extension (`externally_connectable`). The manifest pins the public key, so the extension ID the page talks to is the same on every machine.
 
