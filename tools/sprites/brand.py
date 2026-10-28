@@ -91,7 +91,7 @@ def build_banner():
     BRAND.mkdir(parents=True, exist_ok=True)
     img.convert("RGB").save(BRAND / "banner.png")
     SITE.mkdir(exist_ok=True)
-    img.convert("RGB").save(SITE / "og.png")
+    img.convert("RGB").save(SITE / "share.png")
 
 
 def sprite_at(mood, k):
@@ -129,6 +129,16 @@ def wrap(d, text, fnt, width):
     return lines + [cur]
 
 
+def fit(d, text, names, size, width):
+    """Largest font up to `size` whose text still fits `width`"""
+    while size > 12:
+        f = font(names, size)
+        if d.textlength(text, font=f) <= width:
+            return f
+        size -= 2
+    return font(names, 12)
+
+
 def heading(d, W, title, sub, y=70):
     d.text((W // 2, y), title, font=font(TITLE_FONT, 64), fill=OUT, anchor="mm")
     d.text((W // 2, y + 66), sub, font=font(BODY_FONT, 30), fill=MUTED, anchor="mm")
@@ -141,10 +151,11 @@ def canvas(W=1280, H=800, bg=CREAM):
 
 def shot_meet():
     img, d = canvas()
-    d.text((110, 270), "Meet Sproutling", font=font(TITLE_FONT, 84), fill=OUT, anchor="lm")
-    body = font(BODY_FONT, 36)
-    for i, line in enumerate(wrap(d, "A calm little pet that remembers your streak with you, and has a kind word when the scrolling goes on.", body, 560)):
-        d.text((110, 370 + i * 52), line, font=body, fill=MUTED, anchor="lm")
+    d.text((110, 215), "Meet", font=font(TITLE_FONT, 60), fill=MUTED, anchor="lm")
+    d.text((110, 300), "Sproutling", font=fit(d, "Sproutling", TITLE_FONT, 96, 500), fill=OUT, anchor="lm")
+    body = font(BODY_FONT, 34)
+    for i, line in enumerate(wrap(d, "A calm little pet that remembers your streak with you, and has a kind word when the scrolling goes on.", body, 500)):
+        d.text((110, 405 + i * 50), line, font=body, fill=MUTED, anchor="lm")
     img.alpha_composite(tile((560, 560), MINT + (255,), 40), (660, 120))
     shadowed(img, d, 660 + 24, 120 + 24, 16)
     return img
@@ -232,11 +243,12 @@ def shot_sites():
 
 def promo_small():
     img, d = canvas(440, 280)
-    img.alpha_composite(tile((200, 200), MINT + (255,), 22), (28, 40))
-    shadowed(img, d, 28 + 20, 40 + 24, 5)
-    d.text((248, 112), "Sproutling", font=font(TITLE_FONT, 40), fill=OUT, anchor="lm")
+    img.alpha_composite(tile((168, 168), MINT + (255,), 20), (24, 56))
+    shadowed(img, d, 24 + 20, 56 + 14, 4)
+    avail = 440 - 212 - 16
+    d.text((212, 112), "Sproutling", font=fit(d, "Sproutling", TITLE_FONT, 40, avail), fill=OUT, anchor="lm")
     for i, line in enumerate(("Keep your streak.", "Come up for air.")):
-        d.text((248, 160 + i * 30), line, font=font(BODY_FONT, 24), fill=MUTED, anchor="lm")
+        d.text((212, 156 + i * 28), line, font=fit(d, line, BODY_FONT, 22, avail), fill=MUTED, anchor="lm")
     return img
 
 
