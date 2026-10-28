@@ -48,14 +48,16 @@ export async function mountPet({ nudges = false } = {}) {
     const hungryBag = createBag(HUNGRY_NUDGES);
 
     watchScroll(async () => {
-      if (!nudgesOn) return;
+      if (!nudgesOn) return false;
       // Shared across tabs so several open feeds don't each take a turn
       const { lastNudgeAt } = (await browser.storage.local.get('lastNudgeAt')) as { lastNudgeAt?: number };
-      if (!canNudge(lastNudgeAt, Date.now())) return;
+      if (!canNudge(lastNudgeAt, Date.now())) return false;
       await browser.storage.local.set({ lastNudgeAt: Date.now() });
       const hungry = state && displayMood(state, Date.now()) === 'hungry';
       const line = hungry && Math.random() < 0.3 ? hungryBag() : bag();
-      if (line) bubble.show(line);
+      if (!line) return false;
+      bubble.show(line);
+      return true;
     });
   }
 

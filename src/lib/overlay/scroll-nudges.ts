@@ -4,7 +4,8 @@ const offset = (t: EventTarget | null) =>
   t instanceof Document ? (t.scrollingElement?.scrollTop ?? 0) : t instanceof Element ? t.scrollTop : undefined;
 
 // Capture phase: scroll doesn't bubble, and feeds often scroll an inner container
-export function watchScroll(onThreshold: () => void) {
+// onThreshold resolves true when a nudge was shown, which raises the bar for the next one
+export function watchScroll(onThreshold: () => Promise<boolean>) {
   const meter = createScrollMeter();
   const last = new WeakMap<EventTarget, number>();
 
@@ -16,7 +17,7 @@ export function watchScroll(onThreshold: () => void) {
       if (y === undefined) return;
       const prev = last.get(e.target);
       last.set(e.target, y);
-      if (prev !== undefined && meter.add(y - prev)) onThreshold();
+      if (prev !== undefined && meter.add(y - prev)) void onThreshold().then((shown) => shown && meter.escalate());
     },
     { capture: true, passive: true },
   );

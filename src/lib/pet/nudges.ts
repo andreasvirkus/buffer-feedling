@@ -1,5 +1,8 @@
-export const SCROLL_THRESHOLD_PX = 5000;
-export const NUDGE_COOLDOWN_MS = 10 * 60_000;
+export const SCROLL_BASE_PX = 3000;
+export const SCROLL_GROWTH = 1.5;
+export const SCROLL_MAX_PX = 20_000;
+// Only stops several tabs speaking at once; the growing distance does the pacing
+export const NUDGE_COOLDOWN_MS = 30_000;
 // A jump (Home, "back to top") shouldn't count as a long scroll
 export const MAX_STEP_PX = 1500;
 
@@ -47,16 +50,22 @@ export function createBag(lines: readonly string[], random: () => number = Math.
   };
 }
 
-/** Sums scroll distance and reports when it crosses the threshold, then starts over */
-export function createScrollMeter(thresholdPx = SCROLL_THRESHOLD_PX) {
+/** Distance needed for the nth nudge: frequent at first, then easing off */
+export const thresholdFor = (shown: number) => Math.min(SCROLL_BASE_PX * SCROLL_GROWTH ** shown, SCROLL_MAX_PX);
+
+/** Sums scroll distance and reports when it crosses the current threshold, then starts over */
+export function createScrollMeter(threshold: (shown: number) => number = thresholdFor) {
   let total = 0;
+  let shown = 0;
   return {
     add(px: number): boolean {
       total += Math.min(Math.abs(px), MAX_STEP_PX);
-      if (total < thresholdPx) return false;
+      if (total < threshold(shown)) return false;
       total = 0;
       return true;
     },
+    /** Call when a nudge was actually shown, so the next one needs more scrolling */
+    escalate: () => void shown++,
     reset: () => void (total = 0),
   };
 }
