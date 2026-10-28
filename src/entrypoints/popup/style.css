@@ -232,6 +232,11 @@ body {
   outline-offset: 2px;
 }
 
+.section-title {
+  margin: 4px 0 0;
+  font-size: 14px;
+}
+
 .hint {
   margin: -4px 0 0;
   color: var(--muted);

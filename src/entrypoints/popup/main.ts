@@ -1,7 +1,7 @@
 import type { PollMeta } from '@/lib/poller';
 import { spriteName, type Mood, type PetState } from '@/lib/pet/state';
 import { send, type ConnectionStatus } from '@/lib/messages';
-import { grantedServices, isVisitable, sitePatterns } from '@/lib/platforms/sites';
+import { SITES, grantedServices, isVisitable, sitePatterns } from '@/lib/platforms/sites';
 
 const app = document.querySelector<HTMLElement>('#app')!;
 
@@ -64,6 +64,21 @@ function siteChip(service: string, on: boolean): Node {
   return b;
 }
 
+// Granted sites stay listed so they can always be switched off, even without a matching channel
+async function sitesBlock(services: string[], label: string): Promise<Node[]> {
+  const granted = grantedServices((await browser.permissions.getAll()).origins ?? []);
+  const shown = [...new Set([...services, ...granted])];
+  if (!shown.length) return [];
+  const on = new Set(granted);
+  const nodes: Node[] = [
+    h('ul', { className: 'sites', attrs: { 'aria-label': label } }, ...shown.map((s) => h('li', {}, siteChip(s, on.has(s))))),
+  ];
+  if (shown.some(isVisitable)) {
+    nodes.push(h('p', { className: 'hint', textContent: 'Tap a site to let Sproutling visit it. Tap again to stop.' }));
+  }
+  return nodes;
+}
+
 function nudgeToggle(on: boolean) {
   const input = h('input', { attrs: { type: 'checkbox', role: 'switch' } });
   input.checked = on;
@@ -99,6 +114,10 @@ async function render() {
         h('div', {}, h('h1', { textContent: 'Sproutling' }), h('p', { className: 'lede', textContent: 'Connect Buffer to wake your pet up.' })),
       ),
       button('Connect Buffer', () => act('CONNECT'), true),
+      h('h2', { className: 'section-title', textContent: 'No Buffer? Keep me company anyway' }),
+      h('p', { className: 'hint', textContent: 'Pick the sites you scroll on and Sproutling will keep you company there, with a kind word when you scroll for a good while.' }),
+      ...(await sitesBlock(Object.keys(SITES), 'Sites')),
+      nudgeToggle(nudgesOn),
     );
     return app.replaceChildren(...nodes);
   }
@@ -141,19 +160,7 @@ async function render() {
         ).map(([k, v]) => h('div', {}, h('dt', { textContent: k }), h('dd', { textContent: String(v) }))),
       ),
     );
-    if (petState.connectedServices.length) {
-      const granted = new Set(grantedServices((await browser.permissions.getAll()).origins ?? []));
-      nodes.push(
-        h(
-          'ul',
-          { className: 'sites', attrs: { 'aria-label': 'Connected channels' } },
-          ...petState.connectedServices.map((s) => h('li', {}, siteChip(s, granted.has(s)))),
-        ),
-      );
-      if (petState.connectedServices.some(isVisitable)) {
-        nodes.push(h('p', { className: 'hint', textContent: 'Tap a channel to let Sproutling visit its site. Tap again to stop.' }));
-      }
-    }
+    nodes.push(...(await sitesBlock(petState.connectedServices, 'Connected channels')));
     nodes.push(nudgeToggle(nudgesOn));
     nodes.push(h('p', { className: 'foot', textContent: `Connected as ${status.account?.name ?? 'your Buffer account'} · updated ${ago(petState.updatedAt)}` }));
   } else {

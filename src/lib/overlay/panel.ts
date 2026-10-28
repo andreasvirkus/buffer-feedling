@@ -67,11 +67,13 @@ export function createPanel(parent: ParentNode, opts: { id: string; onNap: (napp
     },
     show: () => void (el.hidden = false),
     hide: () => void (el.hidden = true),
-    update(state: PetState | undefined, mood: Mood, isNapping: boolean) {
+    update(state: PetState | undefined, mood: Mood, isNapping: boolean, connected: boolean) {
       napping = isNapping;
       status.textContent = isNapping
         ? 'Napping. Sweet dreams.'
-        : state
+        : !connected
+          ? 'Keeping you company. Connect Buffer from the toolbar icon and I\u2019ll watch your streak too.'
+          : state
           ? `Feeling ${FEELING[mood]}. ${state.sent} of ${state.target} posts this week.`
           : 'Waiting to be connected.';
       nap.textContent = isNapping ? 'Wake me up' : 'Let me nap';

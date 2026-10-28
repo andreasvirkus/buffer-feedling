@@ -19,6 +19,8 @@ The pet is a mood computed from your Buffer account, read-only:
 - **Snacks**: drafts created today, with a small capped bonus. **Treats**: new ideas, purely cosmetic.
 - **Feeding**: when a poll finds newer activity than the last one, the pet eats for a few seconds.
 
+Connecting Buffer is optional. Without it, Sproutling can still keep you company on the sites you allow, with the scroll nudges, and the posting side just waits.
+
 A service worker polls every 15 minutes (plus a throttled nudge when the Buffer tab becomes visible), writes the result to storage, and the overlay in each tab just reads it.
 
 ## Setup

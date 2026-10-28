@@ -25,6 +25,7 @@ WHAT IT DOES
 • Sits in the corner of the Buffer app and shows how your week of posting is going, with five moods and a little animation for each.
 • Visits the sites of your connected channels (LinkedIn, X, Instagram, Facebook, Threads, TikTok, YouTube, Pinterest and Bluesky), one site at a time, and only when you allow it.
 • Offers a kind word in a speech bubble when you've been scrolling for a good while, such as "Let's pause and reflect on what we've consumed." It starts chatty and eases off, and there's a switch to turn it off.
+• Works without Buffer too: choose the sites you scroll on and it keeps you company there, with the same nudges.
 • Can be dragged anywhere, and remembers its spot on each site. Click it for a small panel with a link back to Buffer and a nap button.
 
 HOW IT WORKS
@@ -72,7 +73,7 @@ Show a small pixel pet that reflects the user's Buffer posting activity, and off
 - Personally identifiable information: name and email address from the user's Buffer account.
 - Authentication information: Buffer sign-in tokens.
 
-Both stay in the browser's extension storage and are sent only to Buffer. Leave the other categories unticked: scroll distance is held in memory and never stored or sent, and page content is not read.
+Both only exist once the user connects Buffer; the extension also works without connecting. Both stay in the browser's extension storage and are sent only to Buffer. Leave the other categories unticked: scroll distance is held in memory and never stored or sent, and page content is not read.
 
 **Certifications** (tick all three)
 - Data isn't sold to third parties.

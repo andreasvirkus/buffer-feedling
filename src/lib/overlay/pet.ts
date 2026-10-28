@@ -34,18 +34,20 @@ export async function mountPet({ nudges = false } = {}) {
   dock.append(pet);
   root.append(style, dock);
 
-  const hint = () => void send({ type: 'POLL_HINT' }).catch(() => {});
+  const stored = await browser.storage.local.get(['petState', 'account', 'napping', 'petPositions', 'nudgesEnabled']);
+  let state = stored.petState as PetState | undefined;
+  // Works without Buffer too: just the company and the nudges
+  let connected = !!stored.account;
+
+  const hint = () => connected && void send({ type: 'POLL_HINT' }).catch(() => {});
   document.addEventListener('visibilitychange', () => document.visibilityState === 'visible' && hint());
   hint();
-
-  const stored = await browser.storage.local.get(['petState', 'napping', 'petPositions', 'nudgesEnabled']);
-  let state = stored.petState as PetState | undefined;
   let napping = stored.napping === true;
   let nudgesOn = stored.nudgesEnabled !== false;
   const saved = (stored.petPositions as Record<string, unknown> | undefined)?.[location.hostname];
   let pos: Pos = isPos(saved) ? saved : DEFAULT_POS;
 
-  const currentMood = (): Mood => (napping ? 'sleepy' : state ? displayMood(state, Date.now()) : 'sleepy');
+  const currentMood = (): Mood => (napping ? 'sleepy' : !connected ? 'content' : state ? displayMood(state, Date.now()) : 'sleepy');
   const sprite = await createSprite(spriteName(currentMood()));
   pet.append(sprite.canvas);
   const size = () => ({ w: sprite.canvas.width, h: sprite.canvas.height });
@@ -82,7 +84,7 @@ export async function mountPet({ nudges = false } = {}) {
   function togglePanel() {
     if (panel.isOpen) return closePanel();
     bubble.hide();
-    panel.update(state, currentMood(), napping);
+    panel.update(state, currentMood(), napping, connected);
     panel.show();
     pet.setAttribute('aria-expanded', 'true');
   }
@@ -139,9 +141,15 @@ export async function mountPet({ nudges = false } = {}) {
     sprite.setAnimation(spriteName(mood));
     pet.setAttribute(
       'aria-label',
-      napping ? 'Sproutling is napping' : state ? `Sproutling is ${mood}: ${state.sent} of ${state.target} posts this week` : 'Sproutling is waiting to be connected',
+      napping
+        ? 'Sproutling is napping'
+        : !connected
+          ? 'Sproutling is keeping you company'
+          : state
+            ? `Sproutling is ${mood}: ${state.sent} of ${state.target} posts this week`
+            : 'Sproutling is waking up',
     );
-    if (panel.isOpen) panel.update(state, mood, napping);
+    if (panel.isOpen) panel.update(state, mood, napping, connected);
     if (!napping && mood === 'eating' && state?.lastFedAt) {
       eatTimer = setTimeout(apply, Date.parse(state.lastFedAt) + EATING_MS - Date.now() + 50);
     }
@@ -174,6 +182,7 @@ export async function mountPet({ nudges = false } = {}) {
       if (napping) bubble.hide();
     }
     if ('petState' in changes) state = changes.petState!.newValue as PetState | undefined;
-    if ('petState' in changes || 'napping' in changes) apply();
+    if ('account' in changes) connected = !!changes.account!.newValue;
+    if ('petState' in changes || 'napping' in changes || 'account' in changes) apply();
   });
 }
