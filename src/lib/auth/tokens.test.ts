@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { OAuthError, createTokenManager, expiresAtFrom, isExpired, tokensFromResponse, type TokenStore, type Tokens } from './tokens';
+import { OAuthError, createTokenManager, expiresAtFrom, isExpired, keepRefreshToken, tokensFromResponse, type TokenStore, type Tokens } from './tokens';
 
 const memoryStore = (initial: Tokens | null): TokenStore & { value: Tokens | null } => {
   const s = {
@@ -79,7 +79,7 @@ describe('token manager', () => {
 
   it('disconnect clears everything', async () => {
     const store = memoryStore(tok('1', 9_999));
-    const m = createTokenManager({ store });
+    const m = createTokenManager({ store, refresh: vi.fn() });
     await m.disconnect();
     expect(await m.isConnected()).toBe(false);
   });
@@ -96,4 +96,11 @@ describe('tokensFromResponse', () => {
     expect(tokensFromResponse({ access_token: 'a', expires_in: 100 }, 0).refreshToken).toBeNull());
   it('rejects a response without an access token', () =>
     expect(() => tokensFromResponse({ error: 'x' })).toThrow(OAuthError));
+});
+
+describe('keepRefreshToken', () => {
+  it('keeps the old one when the response did not rotate it', () =>
+    expect(keepRefreshToken({ accessToken: 'a', refreshToken: null, expiresAt: 1 }, 'old').refreshToken).toBe('old'));
+  it('takes the rotated one', () =>
+    expect(keepRefreshToken({ accessToken: 'a', refreshToken: 'new', expiresAt: 1 }, 'old').refreshToken).toBe('new'));
 });

@@ -5,7 +5,8 @@ import { CALLBACK_URL, CLIENT_ID, TOKEN_URL } from '../config';
 import type { CallbackMessage, CallbackReply } from '../messages';
 import { matchPending, type PendingAuth } from './pending';
 import { buildAuthorizeUrl, createPkcePair, createState } from './pkce';
-import { tokenManager, tokensFromResponse } from './tokens';
+import { tokenManager } from './manager';
+import { tokensFromResponse } from './tokens';
 
 // Everything we persist besides tokens; wiped on disconnect
 const DERIVED_KEYS = ['account', 'petState', 'pollMeta', 'connectedAt', 'lastFedAt', 'seenAt', 'authError'];

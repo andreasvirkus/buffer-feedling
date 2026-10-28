@@ -2,7 +2,7 @@ import { ApiError, graphql } from './api/client';
 import { detectFeed, pollVariables, toPetInputs, type PollData } from './api/poll';
 import { POLL_QUERY } from './api/queries';
 import { fetchAccount, getAccount } from './auth/flow';
-import { tokenManager } from './auth/tokens';
+import { tokenManager } from './auth/manager';
 import { computePetState, type PetState } from './pet/state';
 
 export interface PollMeta {

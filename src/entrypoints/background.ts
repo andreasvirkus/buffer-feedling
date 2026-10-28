@@ -1,5 +1,5 @@
 import { disconnect, getAccount, handleCallbackMessage, startConnect } from '@/lib/auth/flow';
-import { tokenManager } from '@/lib/auth/tokens';
+import { tokenManager } from '@/lib/auth/manager';
 import { SITE_ORIGIN } from '@/lib/config';
 import type { CallbackMessage, CallbackReply, ConnectionStatus, Message, Reply } from '@/lib/messages';
 import { syncPlatformScripts } from '@/lib/platforms/register';

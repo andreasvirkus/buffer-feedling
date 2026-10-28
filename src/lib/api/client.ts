@@ -1,5 +1,6 @@
 import { API_URL } from '../config';
-import { OAuthError, tokenManager } from '../auth/tokens';
+import { tokenManager } from '../auth/manager';
+import { OAuthError } from '../auth/tokens';
 
 export class ApiError extends Error {
   constructor(

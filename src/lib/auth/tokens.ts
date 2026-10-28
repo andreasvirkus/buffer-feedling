@@ -1,5 +1,3 @@
-import { CLIENT_ID, TOKEN_URL } from '../config';
-
 export interface Tokens {
   accessToken: string;
   refreshToken: string | null;
@@ -20,19 +18,6 @@ const EXPIRY_SKEW_MS = 60_000;
 export const expiresAtFrom = (now: number, expiresInSec: number) => now + expiresInSec * 1000 - EXPIRY_SKEW_MS;
 export const isExpired = (t: Tokens, now: number) => now >= t.expiresAt;
 
-export async function requestTokens(params: Record<string, string>, now = Date.now()): Promise<Tokens> {
-  const res = await fetch(TOKEN_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ client_id: CLIENT_ID, ...params }),
-  });
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok || json.error) {
-    throw new OAuthError(json.error_description || json.error || `HTTP ${res.status}`, json.error);
-  }
-  return tokensFromResponse(json, now);
-}
-
 export function tokensFromResponse(json: Record<string, unknown>, now = Date.now()): Tokens {
   if (typeof json.access_token !== 'string') throw new OAuthError('Token response had no access_token');
   return {
@@ -42,8 +27,11 @@ export function tokensFromResponse(json: Record<string, unknown>, now = Date.now
   };
 }
 
-export const refreshWith = (refreshToken: string) =>
-  requestTokens({ grant_type: 'refresh_token', refresh_token: refreshToken });
+/** A refresh response that doesn't rotate the token must not wipe the one we hold */
+export const keepRefreshToken = (next: Tokens, previous: string): Tokens => ({
+  ...next,
+  refreshToken: next.refreshToken ?? previous,
+});
 
 export interface TokenStore {
   get(): Promise<Tokens | null>;
@@ -53,10 +41,10 @@ export interface TokenStore {
 
 export function createTokenManager(deps: {
   store: TokenStore;
-  refresh?: (refreshToken: string) => Promise<Tokens>;
+  refresh: (refreshToken: string) => Promise<Tokens>;
   now?: () => number;
 }) {
-  const { store, refresh = refreshWith, now = Date.now } = deps;
+  const { store, refresh, now = Date.now } = deps;
   let inflight: Promise<Tokens> | null = null;
 
   // Single-flight: refresh tokens rotate, a second concurrent use revokes the grant
@@ -107,5 +95,3 @@ export const chromeTokenStore: TokenStore = {
   set: (t) => browser.storage.local.set({ [KEY]: t }),
   clear: () => browser.storage.local.remove(KEY),
 };
-
-export const tokenManager = createTokenManager({ store: chromeTokenStore });

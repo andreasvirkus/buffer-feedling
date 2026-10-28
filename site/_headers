@@ -5,3 +5,11 @@
 /callback.html
   Referrer-Policy: no-referrer
   Cache-Control: no-store
+
+/refresh
+  Referrer-Policy: no-referrer
+  Cache-Control: no-store
+
+/refresh.html
+  Referrer-Policy: no-referrer
+  Cache-Control: no-store
