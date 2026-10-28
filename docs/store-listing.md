@@ -6,8 +6,8 @@ Copy and answers to paste into the Developer Dashboard. Assets are in `docs/stor
 
 **Name**: Sproutling
 
-**Summary** (from the manifest, 113 of 132 characters):
-A pixel pet fed by your Buffer posts. It follows you around and gently nudges you to share instead of doomscroll.
+**Summary** (from the manifest, 120 of 132 characters):
+A pixel pet that keeps your Buffer posting streak company and gently reminds you to stretch and look up from the scroll.
 
 **Category**: Fun (Productivity is the alternative)
 
@@ -16,7 +16,7 @@ A pixel pet fed by your Buffer posts. It follows you around and gently nudges yo
 **Description**
 
 ```
-Sproutling is a tiny pixel pet that lives in the corner of your browser and gets fed by what you post on Buffer.
+Sproutling is a tiny pixel pet that lives in the corner of your browser and gets fed by what you post on Buffer. It helps you remember your streak, and when the scrolling goes on a while it's a calm presence with a kind word to stretch, sip some water and look up.
 
 Post something and it perks up. Let your queue run dry and it gets hungry. Disappear for a few days and it takes a nap. It never dies, we're not monsters.
 

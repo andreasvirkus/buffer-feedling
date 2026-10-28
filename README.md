@@ -4,7 +4,7 @@
 
 # Sproutling
 
-A pixel pet that lives in your browser and gets fed by your Buffer activity. Send a post and it perks up. Let the queue run dry and it gets hungry. Ignore it for a few days and it takes a nap (it never dies, we're not monsters).
+A pixel pet that lives in your browser, helps you remember your Buffer posting streak, and keeps you company when the scrolling goes on a while, with a kind word to stretch, sip some water and look up. Send a post and it perks up. Let the queue run dry and it gets hungry. Ignore it for a few days and it takes a nap (it never dies, we're not monsters).
 
 It sits in the corner of the Buffer web app, and, once you let it, on the sites of the channels you've connected.
 

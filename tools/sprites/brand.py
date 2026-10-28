@@ -71,7 +71,7 @@ def build_banner():
 
     OY = 36  # centres the block vertically
     d.text((W // 2, 105 + OY), "Sproutling", font=font(TITLE_FONT, 92), fill=OUT, anchor="mm")
-    d.text((W // 2, 185 + OY), "A pixel pet fed by your Buffer activity", font=font(BODY_FONT, 36), fill=MUTED, anchor="mm")
+    d.text((W // 2, 185 + OY), "Keep your streak. Come up for air.", font=font(BODY_FONT, 36), fill=MUTED, anchor="mm")
 
     moods = ["hungry", "idle", "full", "sleepy", "eating"]
     labels = ["hungry", "content", "full", "sleepy", "eating"]
@@ -143,7 +143,7 @@ def shot_meet():
     img, d = canvas()
     d.text((110, 270), "Meet Sproutling", font=font(TITLE_FONT, 84), fill=OUT, anchor="lm")
     body = font(BODY_FONT, 36)
-    for i, line in enumerate(wrap(d, "A pixel pet that gets fed by your Buffer posts, and cheers you on to share something of your own.", body, 560)):
+    for i, line in enumerate(wrap(d, "A calm little pet that remembers your streak with you, and has a kind word when the scrolling goes on.", body, 560)):
         d.text((110, 370 + i * 52), line, font=body, fill=MUTED, anchor="lm")
     img.alpha_composite(tile((560, 560), MINT + (255,), 40), (660, 120))
     shadowed(img, d, 660 + 24, 120 + 24, 16)
@@ -235,7 +235,7 @@ def promo_small():
     img.alpha_composite(tile((200, 200), MINT + (255,), 22), (28, 40))
     shadowed(img, d, 28 + 20, 40 + 24, 5)
     d.text((248, 112), "Sproutling", font=font(TITLE_FONT, 40), fill=OUT, anchor="lm")
-    for i, line in enumerate(("Post more.", "Feed the blob.")):
+    for i, line in enumerate(("Keep your streak.", "Come up for air.")):
         d.text((248, 160 + i * 30), line, font=font(BODY_FONT, 24), fill=MUTED, anchor="lm")
     return img
 
