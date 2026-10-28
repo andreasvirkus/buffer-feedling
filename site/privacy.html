@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Privacy policy · Buffer Feedling</title>
+    <meta name="description" content="What Buffer Feedling reads, what it keeps on your device, and what it never does." />
+    <link rel="canonical" href="https://sproutling.pet/privacy" />
+    <link rel="icon" href="favicon.png" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="top">
+      <a class="brand" href="/"><img src="favicon.png" alt="" width="32" height="32" />Buffer Feedling</a>
+      <nav aria-label="Primary">
+        <a href="/#features">Features</a>
+        <a href="/#install">Install</a>
+        <a href="https://github.com/andreasvirkus/buffer-feedling">GitHub</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="doc" aria-labelledby="privacy-h">
+        <h1 id="privacy-h">Privacy policy</h1>
+        <p class="sub">Last updated 28 October 2026.</p>
+
+        <p>
+          Buffer Feedling is a browser extension with a small pixel pet called Sproutling. This page explains what it
+          looks at, what it keeps, and what it never does. In short: it reads a little from your Buffer account, keeps it
+          on your device, and doesn't send it anywhere else.
+        </p>
+
+        <h2>What it reads from Buffer</h2>
+        <p>
+          After you connect, the extension asks Buffer for read-only access (<code>account:read</code>,
+          <code>posts:read</code> and <code>ideas:read</code>, plus <code>offline_access</code> so you stay signed in).
+          Every 15 minutes it asks for your name, email address and organisation ID, the services of your connected channels
+          and their posting goals, and the times and status of your recent posts and ideas. It uses these to work out
+          how Sproutling is feeling.
+        </p>
+        <p>It never creates, edits or deletes anything in your Buffer account.</p>
+
+        <h2>What it keeps, and where</h2>
+        <p>
+          Everything is stored in your browser's extension storage, on your device. That includes your sign-in tokens, the
+          account details above, the numbers behind Sproutling's mood, where you've placed the pet on each site, and
+          your nap and nudge settings. Nothing is synced to a server of ours, because we don't run one.
+        </p>
+        <p>
+          Your tokens are used only by the extension's background worker. Websites you visit can't read them, and
+          neither can the pet.
+        </p>
+
+        <h2>The pages on this site</h2>
+        <p>
+          Buffer only accepts sign-in and refresh requests from a web address it knows, so two small pages on this site
+          take part. The sign-in page receives a one-time code from Buffer, trades it for tokens and hands them to the
+          extension. The refresh page does the same when your session needs renewing, inside a hidden frame the
+          extension opens. The tokens pass through those pages in your browser's memory and are not stored or logged by
+          us.
+        </p>
+        <p>
+          The one-time sign-in code does appear in the address of that page as you arrive. It can't be used without a
+          secret that never leaves your extension. This site is plain static pages. We add no analytics, advertising or
+          tracking scripts.
+        </p>
+
+        <h2>Visiting other sites</h2>
+        <p>
+          Sproutling only appears on the Buffer app and on sites you allow. For each connected channel, the popup
+          offers a button, and the browser asks you to approve that site before the pet appears there. You can take the
+          permission back at any time.
+        </p>
+        <p>
+          On those sites the extension shows the pet and measures how far you've scrolled, so it knows when to say a
+          kind word. It does not record or send the content of the page, what you type, or what you click. The
+          scroll distance is held in memory and thrown away.
+        </p>
+
+        <h2>What it never does</h2>
+        <ul class="checks">
+          <li>It doesn't sell, share or transfer your data to anyone.</li>
+          <li>It doesn't use your data for advertising, profiling or anything beyond running the pet.</li>
+          <li>It doesn't load or run remote code.</li>
+          <li>It makes network requests only to Buffer (<code>auth.buffer.com</code> and <code>api.buffer.com</code>) and to the two pages on this site.</li>
+        </ul>
+
+        <h2>Deleting your data</h2>
+        <p>
+          Choose <strong>Disconnect</strong> in the popup to remove your tokens, account details and the pet's stored
+          state. Removing the extension deletes everything it saved in your browser. You can also revoke its access from
+          your Buffer account settings.
+        </p>
+
+        <h2>Who's behind it</h2>
+        <p>
+          Buffer Feedling is an independent project, built on Buffer's public API for the Buffer Commit contest. It is
+          not an official Buffer product. The code is open source on
+          <a href="https://github.com/andreasvirkus/buffer-feedling">GitHub</a>, so you can check any of the above for
+          yourself.
+        </p>
+        <p>
+          Questions or concerns? Open an issue on
+          <a href="https://github.com/andreasvirkus/buffer-feedling/issues">GitHub</a> and I'll reply there. If this
+          policy changes, the date at the top will change with it.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        Made for <strong>Buffer Commit</strong> by <a href="https://andreasvirkus.me">Andreas</a>. An independent project,
+        built on Buffer's public API.
+      </p>
+      <p><a href="https://github.com/andreasvirkus/buffer-feedling">Source on GitHub</a> · <a href="/privacy">Privacy</a></p>
+    </footer>
+  </body>
+</html>

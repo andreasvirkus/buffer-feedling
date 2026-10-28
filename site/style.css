@@ -497,3 +497,20 @@ footer {
     transform: rotate(135deg);
   }
 }
+
+.doc {
+  max-width: 68ch;
+}
+
+.doc > * + * {
+  margin-top: 16px;
+}
+
+.doc h2 {
+  margin-top: 36px;
+  font-size: 24px;
+}
+
+.doc h1 {
+  font-size: clamp(32px, 6vw, 44px);
+}
