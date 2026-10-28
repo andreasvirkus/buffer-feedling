@@ -2,6 +2,7 @@ import { disconnect, getAccount, handleCallbackMessage, startConnect } from '@/l
 import { tokenManager } from '@/lib/auth/tokens';
 import { SITE_ORIGIN } from '@/lib/config';
 import type { CallbackMessage, CallbackReply, ConnectionStatus, Message, Reply } from '@/lib/messages';
+import { syncPlatformScripts } from '@/lib/platforms/register';
 import { POLL_ALARM, POLL_MINUTES, pollIfStale, pollOnce } from '@/lib/poller';
 
 const HINT_MIN_INTERVAL_MS = 60_000;
@@ -32,6 +33,12 @@ export default defineBackground(() => {
   });
   browser.runtime.onStartup.addListener(() => void pollOnce());
   browser.runtime.onInstalled.addListener(() => void pollOnce());
+
+  const sync = () => void syncPlatformScripts().catch(() => {});
+  browser.runtime.onStartup.addListener(sync);
+  browser.runtime.onInstalled.addListener(sync);
+  browser.permissions.onAdded.addListener(sync);
+  browser.permissions.onRemoved.addListener(sync);
 
   browser.runtime.onMessageExternal.addListener((msg: CallbackMessage, sender, sendResponse) => {
     if (sender.origin !== SITE_ORIGIN) return;

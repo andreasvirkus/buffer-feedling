@@ -70,7 +70,8 @@ src/
     auth/        PKCE, token storage and refresh, connect flow
     api/         GraphQL client, the poll query, response mapping
     pet/         computePetState and friends (pure, tested)
-    overlay/     shadow-root host, canvas sprite player
+    overlay/     shadow-root host, canvas sprite player, shared pet mount
+    platforms/   channel → site map, runtime content-script registration
   public/        sprites and icons, copied into the build
 site/            static landing page (plain HTML/CSS/JS, deploys as-is)
 tools/sprites/   Python sprite and brand generators
@@ -83,7 +84,7 @@ docs/brand/      banner and logo
 - **Tokens live in the service worker.** Content scripts never get them, and never drive auth. The callback page only sees them for the moment between Buffer and the extension, and the extension checks the `state` it issued before accepting anything.
 - **Read-only, and gentle with the rate limit.** Minimal scopes. One aliased GraphQL request per poll, because the API allows roughly 100 requests per 15 minutes.
 - **Never block the host page.** The overlay wrapper ignores pointer events; only the pet itself catches them. It lives in a closed shadow root and puts itself back if a single-page app rips it out.
-- **Ask for permissions at the moment they make sense.** Social sites are optional host permissions, requested after connecting and only for the channels you have.
+- **Ask for permissions at the moment they make sense.** Social sites are optional host permissions, requested only when you tap a connected channel in the popup. The pet's sprites are bundled into the content script, so sites can't detect the extension by probing for its files.
 - **Pixel art stays crisp.** Whole-pixel frames, integer scaling, no rotation or sub-pixel transforms. Feet never move.
 - **Calm by default.** The pet idles gently, pauses when the tab is hidden, and holds a still frame under `prefers-reduced-motion`. It has an accessible name that says how it's doing.
 - **Logic is pure, then tested.** Mood rules, response mapping and token math are plain functions with unit tests. The browser glue stays thin.

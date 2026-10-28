@@ -1,6 +1,7 @@
 import type { PollMeta } from '@/lib/poller';
 import { spriteName, type Mood, type PetState } from '@/lib/pet/state';
 import { send, type ConnectionStatus } from '@/lib/messages';
+import { grantedServices, isVisitable, sitePatterns } from '@/lib/platforms/sites';
 
 const app = document.querySelector<HTMLElement>('#app')!;
 
@@ -49,6 +50,18 @@ const SERVICE_LABEL: Record<string, string> = {
   youtube: 'YouTube',
 };
 const serviceLabel = (s: string) => SERVICE_LABEL[s] ?? s[0]!.toUpperCase() + s.slice(1);
+
+function siteChip(service: string, on: boolean): Node {
+  if (!isVisitable(service)) return document.createTextNode(serviceLabel(service));
+  const b = h('button', { textContent: serviceLabel(service), attrs: { type: 'button', 'aria-pressed': String(on) } });
+  // request() needs the click's user gesture, so no awaiting before it
+  b.onclick = () => {
+    const origins = sitePatterns(service);
+    const done = on ? browser.permissions.remove({ origins }) : browser.permissions.request({ origins });
+    void done.finally(render);
+  };
+  return b;
+}
 
 const sprite = (mood: Mood) =>
   h(
@@ -116,7 +129,17 @@ async function render() {
       ),
     );
     if (petState.connectedServices.length) {
-      nodes.push(h('ul', { className: 'sites', attrs: { 'aria-label': 'Connected sites' } }, ...petState.connectedServices.map((s) => h('li', { textContent: serviceLabel(s) }))));
+      const granted = new Set(grantedServices((await browser.permissions.getAll()).origins ?? []));
+      nodes.push(
+        h(
+          'ul',
+          { className: 'sites', attrs: { 'aria-label': 'Connected channels' } },
+          ...petState.connectedServices.map((s) => h('li', {}, siteChip(s, granted.has(s)))),
+        ),
+      );
+      if (petState.connectedServices.some(isVisitable)) {
+        nodes.push(h('p', { className: 'hint', textContent: 'Tap a channel to let Feedling visit its site. Tap again to stop.' }));
+      }
     }
     nodes.push(h('p', { className: 'foot', textContent: `Connected as ${status.account?.name ?? 'your Buffer account'} · updated ${ago(petState.updatedAt)}` }));
   } else {
@@ -149,6 +172,9 @@ async function act(type: 'CONNECT' | 'DISCONNECT' | 'REFRESH_NOW') {
   }
   await render();
 }
+
+browser.permissions.onAdded.addListener(() => void render());
+browser.permissions.onRemoved.addListener(() => void render());
 
 browser.storage.onChanged.addListener((changes, area) => {
   if (area !== 'local') return;

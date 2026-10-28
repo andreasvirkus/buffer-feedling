@@ -1,3 +1,5 @@
+import { SPRITES } from './sprite-data';
+
 interface SheetMeta {
   frameSize: number;
   frames: { x: number; ms: number }[];
@@ -6,31 +8,24 @@ interface SheetMeta {
 
 interface Animation {
   meta: SheetMeta;
-  sheet: HTMLImageElement;
+  sheet: ImageBitmap;
 }
 
 const SCALE = 2; // integer only, anything else blurs
-const NAMES = ['idle', 'hungry', 'sleepy', 'full', 'eating'];
 
-const loadImage = (src: string) =>
-  new Promise<HTMLImageElement>((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = src;
-  });
+// Decoded in-process: no network, so page CSP can't block it
+async function decode(dataUrl: string): Promise<ImageBitmap> {
+  const bin = atob(dataUrl.slice(dataUrl.indexOf(',') + 1));
+  const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+  return createImageBitmap(new Blob([bytes], { type: 'image/png' }));
+}
 
-async function loadAnimation(name: string): Promise<[string, Animation]> {
-  const base = browser.runtime.getURL(`/sprites/sproutling-${name}` as never);
-  const [meta, sheet] = await Promise.all([
-    fetch(`${base}.json`).then((r) => r.json() as Promise<SheetMeta>),
-    loadImage(`${base}-sheet.png`),
-  ]);
-  return [name, { meta, sheet }];
+async function loadAnimation([name, { meta, sheet }]: [string, (typeof SPRITES)[keyof typeof SPRITES]]): Promise<[string, Animation]> {
+  return [name, { meta, sheet: await decode(sheet) }];
 }
 
 export async function createSprite(initial: string) {
-  const anims = new Map(await Promise.all(NAMES.map(loadAnimation)));
+  const anims = new Map(await Promise.all(Object.entries(SPRITES).map(loadAnimation)));
   const size = anims.get('idle')!.meta.frameSize;
 
   const canvas = document.createElement('canvas');
