@@ -1,6 +1,7 @@
 import type { PollMeta } from '@/lib/poller';
 import { spriteName, type Mood, type PetState } from '@/lib/pet/state';
 import { send, type ConnectionStatus } from '@/lib/messages';
+import { onboardingStep, type Onboarding } from '@/lib/onboarding';
 import { SITES, grantedServices, isVisitable, sitePatterns } from '@/lib/platforms/sites';
 
 const app = document.querySelector<HTMLElement>('#app')!;
@@ -9,13 +10,14 @@ let status: ConnectionStatus = { connected: false };
 let flash: string | undefined;
 
 async function readStored() {
-  const { petState, pollMeta, authError, nudgesEnabled } = (await browser.storage.local.get([
+  const { petState, pollMeta, authError, nudgesEnabled, onboarding } = (await browser.storage.local.get([
     'petState',
     'pollMeta',
     'authError',
     'nudgesEnabled',
-  ])) as { petState?: PetState; pollMeta?: PollMeta; authError?: string; nudgesEnabled?: boolean };
-  return { petState, pollMeta, authError, nudgesOn: nudgesEnabled !== false };
+    'onboarding',
+  ])) as { petState?: PetState; pollMeta?: PollMeta; authError?: string; nudgesEnabled?: boolean; onboarding?: Onboarding };
+  return { petState, pollMeta, authError, nudgesOn: nudgesEnabled !== false, onboarding };
 }
 
 const pct = (n: number) => `${Math.round(n * 100)}%`;
@@ -99,12 +101,69 @@ const sprite = (mood: Mood) =>
     h('img', { attrs: { src: `/sprites/sproutling-${spriteName(mood)}.png`, alt: '', width: '32', height: '32' } }),
   );
 
+const setOnboarding = (o: Onboarding) => browser.storage.local.set({ onboarding: o });
+
+function welcomeView(): Node[] {
+  return [
+    h(
+      'div',
+      { className: 'hero' },
+      sprite('content'),
+      h('div', {}, h('h1', { textContent: "Hi, I'm Sproutling" }), h('p', { className: 'lede', textContent: 'I keep you company while you post and scroll.' })),
+    ),
+    h('p', { className: 'lede', textContent: "I'm fed by what you post on Buffer, and I have a kind word for you when the scrolling goes on a while." }),
+    h(
+      'div',
+      { className: 'stack' },
+      button(
+        'Connect Buffer',
+        async () => {
+          await setOnboarding({});
+          await act('CONNECT');
+        },
+        true,
+      ),
+      button('Skip Buffer for now', () => void setOnboarding({ skippedBuffer: true })),
+    ),
+    h('p', { className: 'hint', textContent: 'Read-only access. I never post anything for you.' }),
+  ];
+}
+
+async function sitesView(petState: PetState | undefined, nudgesOn: boolean): Promise<Node[]> {
+  const channels = status.connected ? (petState?.connectedServices ?? []) : [];
+  const noChannels = status.connected && !!petState && !channels.length;
+  const nodes: Node[] = [
+    h(
+      'div',
+      { className: 'hero' },
+      sprite('content'),
+      h('div', {}, h('h1', { textContent: 'Where should I hang out?' }), h('p', { className: 'lede', textContent: 'I only show up where you say.' })),
+    ),
+    // Before Buffer has been checked, or with no channels, offer every site
+    ...(await sitesBlock(channels.length ? channels : Object.keys(SITES), 'Sites')),
+  ];
+  if (noChannels) {
+    nodes.push(h('p', { className: 'hint', textContent: "Your Buffer account has no channels yet. Add some there and I'll learn where you post." }));
+  }
+  nodes.push(
+    nudgeToggle(nudgesOn),
+    h('div', { className: 'stack' }, button('All set', () => void setOnboarding({ done: true }), true)),
+    h('p', { className: 'hint', textContent: 'You can change all of this later from this popup.' }),
+  );
+  return nodes;
+}
+
 async function render() {
-  const { petState, pollMeta, authError, nudgesOn } = await readStored();
+  const { petState, pollMeta, authError, nudgesOn, onboarding } = await readStored();
   const nodes: Node[] = [];
 
   if (authError && !status.connected) nodes.push(h('p', { className: 'banner', textContent: `Couldn't connect: ${authError}`, attrs: { role: 'alert' } }));
   if (flash) nodes.push(h('p', { className: 'banner', textContent: flash, attrs: { role: 'alert' } }));
+
+  const hasUsed = !!petState || grantedServices((await browser.permissions.getAll()).origins ?? []).length > 0;
+  const step = onboardingStep(onboarding, { connected: status.connected, hasUsed });
+  if (step === 'welcome') return app.replaceChildren(...nodes, ...welcomeView());
+  if (step === 'sites') return app.replaceChildren(...nodes, ...(await sitesView(petState, nudgesOn)));
 
   if (!status.connected) {
     nodes.push(
@@ -161,7 +220,12 @@ async function render() {
         ).map(([k, v]) => h('div', {}, h('dt', { textContent: k }), h('dd', { textContent: String(v) }))),
       ),
     );
-    nodes.push(...(await sitesBlock(petState.connectedServices, 'Connected channels')));
+    const sitesNodes = await sitesBlock(petState.connectedServices, 'Connected channels');
+    nodes.push(
+      ...(sitesNodes.length
+        ? sitesNodes
+        : [h('p', { className: 'hint', textContent: "Your Buffer account has no channels yet. Add some there and I'll learn where you post." })]),
+    );
     nodes.push(nudgeToggle(nudgesOn));
     nodes.push(h('p', { className: 'foot', textContent: `Connected as ${status.account?.name ?? 'your Buffer account'} · updated ${ago(petState.updatedAt)}` }));
   } else {
@@ -205,8 +269,10 @@ browser.storage.onChanged.addListener((changes, area) => {
       if (r.ok) status = r.data;
       return render();
     });
-  } else if ('petState' in changes || 'pollMeta' in changes) void render();
+  } else if ('petState' in changes || 'pollMeta' in changes || 'onboarding' in changes) void render();
 });
+
+void browser.action.setBadgeText({ text: '' });
 
 send({ type: 'GET_STATUS' }).then((r) => {
   if (r.ok) status = r.data;

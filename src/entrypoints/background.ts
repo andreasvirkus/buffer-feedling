@@ -34,6 +34,13 @@ export default defineBackground(() => {
   browser.runtime.onStartup.addListener(() => void pollOnce());
   browser.runtime.onInstalled.addListener(() => void pollOnce());
 
+  // A small hello on the toolbar icon until the popup is opened for the first time
+  browser.runtime.onInstalled.addListener((d) => {
+    if (d.reason !== 'install') return;
+    void browser.action.setBadgeBackgroundColor({ color: '#2f8f6b' });
+    void browser.action.setBadgeText({ text: 'hi' });
+  });
+
   const sync = () => void syncPlatformScripts().catch((e) => console.error('Sproutling: registering site scripts failed', e));
   browser.runtime.onStartup.addListener(sync);
   browser.runtime.onInstalled.addListener(sync);
