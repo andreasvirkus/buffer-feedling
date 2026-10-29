@@ -50,35 +50,57 @@ Sproutling is an independent project, built on Buffer's public API for the Buffe
 
 ## Privacy practices tab
 
-**Single purpose**
-Show a small pixel pet that reflects the user's Buffer posting activity, and offer gentle reminders to share instead of scrolling.
+**Single purpose description**
 
-**Permission justifications**
+```
+A companion pet that encourages healthy posting and scrolling habits: it shows a small pixel pet whose mood follows the user's Buffer posting activity, and offers gentle break reminders when they scroll for a long time.
+```
 
-| Permission | Justification |
-|---|---|
-| `storage` | Keeps the sign-in, the pet's state and the user's settings (pet position, nap, nudges) on the device. |
-| `alarms` | Checks Buffer every 15 minutes in the background so the pet's mood stays current. |
-| `scripting` | Registers the pet's content script only on the sites the user has chosen to let it visit. |
-| `offscreen` | Renews the Buffer sign-in. Buffer's token endpoint only accepts requests from our website's origin, so a hidden page frames a small page of ours that makes the request. |
-| Host `https://auth.buffer.com/*` | Buffer's OAuth sign-in and token endpoints. |
-| Host `https://api.buffer.com/*` | Reads the user's account, channels, posts and ideas, read-only. |
-| Optional hosts (the social sites) | Requested one site at a time, when the user taps a connected channel, so the pet can appear there. Used only to show the pet and measure scroll distance. |
-| Content script on `publish.buffer.com` | Shows the pet in the Buffer web app. |
-| `externally_connectable` (`https://sproutling.pet/*`) | The sign-in page on our site hands the new tokens to the extension. |
+**storage justification**
 
-**Remote code**: No. All code ships in the package.
+```
+Keeps everything the extension needs on the user's device: Buffer sign-in tokens and basic account details (only once the user connects Buffer), the pet's computed state, and the user's settings (pet position per site, nap mode, nudges on or off). Nothing is synced or sent to a server of ours.
+```
 
-**Data collected** (tick these)
-- Personally identifiable information: name and email address from the user's Buffer account.
-- Authentication information: Buffer sign-in tokens.
+**alarms justification**
 
-Both only exist once the user connects Buffer; the extension also works without connecting. Both stay in the browser's extension storage and are sent only to Buffer. Leave the other categories unticked: scroll distance is held in memory and never stored or sent, and page content is not read.
+```
+Wakes the background service worker every 15 minutes to check the user's recent Buffer activity (posts, drafts, ideas and posting goals) so the pet's mood stays current. It only runs once the user has connected Buffer.
+```
+
+**scripting justification**
+
+```
+Registers the pet's content script at runtime, only on the social sites the user has individually chosen in the popup (each through a browser permission prompt), and removes the registration when they take that permission back. The script shows the pet and measures scroll distance for gentle break reminders.
+```
+
+**offscreen justification**
+
+```
+Used only to renew the user's Buffer sign-in. Buffer's token endpoint accepts requests only from our website's origin, not an extension origin, so a hidden offscreen document frames a small page on our own site (sproutling.pet/refresh) that makes the token request and passes the result straight back. The document is closed right afterwards.
+```
+
+**Host permission justification**
+
+```
+auth.buffer.com and api.buffer.com: Buffer's sign-in and token endpoints and its read-only API (account, channels, posts, ideas), used to work out the pet's mood. The content script on publish.buffer.com shows the pet in the Buffer web app. Social sites (LinkedIn, X, Instagram, Facebook, Threads, TikTok, YouTube, Pinterest, Bluesky) are optional permissions, requested one site at a time when the user taps that site in the popup. The extension never reads page content.
+```
+
+**Remote code**: No, I am not using remote code. All code ships in the package.
+
+**Data usage** (tick these three, leave the rest empty)
+- Personally identifiable information: the name and email address from the user's Buffer account.
+- Authentication information: the Buffer sign-in tokens.
+- User activity: scroll distance on the sites the user allows, used to time the gentle nudges. It is held in memory only and never stored or sent.
+
+All of it stays on the device. Only the first two exist at all once the user connects Buffer. Not ticked: health, financial, personal communications, location, web history and website content. The extension never reads page content, and it keeps no browsing history.
 
 **Certifications** (tick all three)
-- Data isn't sold to third parties.
-- Data isn't used or transferred for purposes unrelated to the item's single purpose.
-- Data isn't used or transferred to determine creditworthiness or for lending.
+- I do not sell or transfer user data to third parties, apart from the approved use cases.
+- I do not use or transfer user data for purposes that are unrelated to my item's single purpose.
+- I do not use or transfer user data to determine creditworthiness or for lending purposes.
+
+**Check before submitting**: `pnpm zip:store` runs `scripts/check-manifest.mjs`, which fails the build if the manifest asks for anything beyond Buffer's two hosts and the four permissions above. The social sites must stay optional.
 
 ## Before you submit
 
