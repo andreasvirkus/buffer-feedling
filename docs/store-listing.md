@@ -44,7 +44,7 @@ Sproutling is an independent project, built on Buffer's public API for the Buffe
 **Support URL**: https://github.com/andreasvirkus/buffer-feedling/issues
 
 **Graphics**
-- Icon 128×128: `src/public/icons/128.png` (also in the zip)
+- Icon 128×128: `docs/store/icon-128.png` (the same file as `src/public/icons/128.png`, which is also in the zip)
 - Screenshots 1280×800: `docs/store/screenshot-1.png` to `screenshot-4.png`
 - Small promo tile 440×280: `docs/store/promo-440x280.png`
 

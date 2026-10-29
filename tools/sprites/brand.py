@@ -266,6 +266,7 @@ def build_store():
     for i, make in enumerate((shot_meet, shot_moods, shot_nudge, shot_sites), 1):
         make().convert("RGB").save(STORE / f"screenshot-{i}.png")
     promo_small().convert("RGB").save(STORE / "promo-440x280.png")
+    icon(128, 4).save(STORE / "icon-128.png")  # same pixel-exact tile as the extension icon
 
 
 if __name__ == "__main__":
