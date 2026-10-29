@@ -2,18 +2,26 @@ import { send } from '@/lib/messages';
 import { displayMood, EATING_MS, spriteName, type Mood, type PetState } from '@/lib/pet/state';
 import { canNudge, createBag, HUNGRY_NUDGES, NUDGES } from '../pet/nudges';
 import { BUBBLE_CSS, createBubble } from './bubble';
+import { pixelRing, ringShadow } from './focus-ring';
 import { OVERLAY_TAG, mountOverlay } from './host';
 import { PANEL_CSS, createPanel } from './panel';
 import { DEFAULT_POS, clampPos, dragPos, isDrag, isPos, keyPos, popoverSide, type Pos } from './position';
 import { watchScroll } from './scroll-nudges';
 import { createSprite } from './sprite';
+import { createWalker, dirFromEvent, type Dir, type WalkTick } from './walk';
 
 const CSS = `
   :host { all: initial; position: fixed; inset: 0; pointer-events: none; z-index: 2147483647; }
   .dock { position: fixed; pointer-events: auto; line-height: 0; }
-  .pet { display: block; padding: 0; margin: 0; background: none; border: 0; border-radius: 8px; cursor: grab; touch-action: none; }
+  .pet { position: relative; z-index: 1; display: block; padding: 0; margin: 0; background: none; border: 0; border-radius: 8px; cursor: grab; touch-action: none; }
   .pet:active { cursor: grabbing; }
-  .pet:focus-visible { outline: 2px solid #2f8f6b; outline-offset: 2px; }
+  .pet:focus-visible { outline: none; }
+  .halo { display: none; position: absolute; z-index: 0; width: 2px; height: 2px; pointer-events: none; }
+  .dock:has(.pet:focus-visible) .halo { display: block; }
+  @media (forced-colors: active) {
+    .pet:focus-visible { outline: 3px solid Highlight; outline-offset: 2px; }
+    .halo { display: none !important; }
+  }
   canvas { image-rendering: pixelated; display: block; }
   ${BUBBLE_CSS}
   ${PANEL_CSS}
@@ -31,7 +39,10 @@ export async function mountPet({ nudges = false } = {}) {
   pet.setAttribute('aria-haspopup', 'true');
   pet.setAttribute('aria-expanded', 'false');
   pet.setAttribute('aria-controls', 'panel');
-  dock.append(pet);
+  const halo = document.createElement('div');
+  halo.className = 'halo';
+  halo.setAttribute('aria-hidden', 'true');
+  dock.append(halo, pet);
   root.append(style, dock);
 
   const stored = await browser.storage.local.get(['petState', 'account', 'napping', 'petPositions', 'nudgesEnabled']);
@@ -50,6 +61,12 @@ export async function mountPet({ nudges = false } = {}) {
   const currentMood = (): Mood => (napping ? 'sleepy' : !connected ? 'content' : state ? displayMood(state, Date.now()) : 'sleepy');
   const sprite = await createSprite(spriteName(currentMood()));
   pet.append(sprite.canvas);
+  // A ring on the ground under the pet, in sprite pixels, outlined so it shows on any background
+  const ring = pixelRing(15, 5);
+  const unit = 2;
+  halo.style.boxShadow = ringShadow(ring, unit, '#6fd3a5', '#1f1a24');
+  halo.style.left = `${(sprite.canvas.width - ring.width * unit) / 2}px`;
+  halo.style.top = `${sprite.canvas.height - 19}px`;
   const size = () => ({ w: sprite.canvas.width, h: sprite.canvas.height });
   const view = () => ({ w: document.documentElement.clientWidth, h: document.documentElement.clientHeight });
 
@@ -125,20 +142,73 @@ export async function mountPet({ nudges = false } = {}) {
     if (moved) moved = false;
     else togglePanel();
   });
-  pet.addEventListener('keydown', (e) => {
-    const next = keyPos(pos, e.key);
-    if (!next) return;
-    e.preventDefault();
-    pos = next;
+  // Walking: arrows or WASD while the pet has focus. Bumping into an edge walks in place for a few
+  // cycles, then it turns to face you.
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  const ARROW_KEY: Record<Dir, string> = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
+  const walker = createWalker();
+  const held: Dir[] = [];
+  let walkAnim: string | null = null;
+  let raf = 0;
+  let lastFrame = 0;
+
+  function showWalk(t: WalkTick) {
+    const anim = t.state === 'idle' ? null : `walk-${t.facing}`;
+    if (anim === walkAnim) return;
+    walkAnim = anim;
+    apply();
+  }
+
+  function frame(now: number) {
+    const t = walker.tick(held, Math.min(now - lastFrame, 64), view(), size());
+    lastFrame = now;
+    pos = t.pos;
     place();
-    void savePos();
+    showWalk(t);
+    if (held.length || t.state !== 'idle') raf = requestAnimationFrame(frame);
+    else {
+      raf = 0;
+      void savePos();
+    }
+  }
+
+  pet.addEventListener('keydown', (e) => {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    const dir = dirFromEvent(e);
+    if (!dir) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (reducedMotion.matches) {
+      // No walking animation: hop a step at a time
+      pos = keyPos(pos, ARROW_KEY[dir])!;
+      place();
+      void savePos();
+      return;
+    }
+    if (e.repeat || held.includes(dir)) return;
+    held.push(dir);
+    if (!raf) {
+      closePanel();
+      bubble.hide();
+      walker.start(pos);
+      lastFrame = performance.now();
+      raf = requestAnimationFrame(frame);
+    }
   });
+  pet.addEventListener('keyup', (e) => {
+    const dir = dirFromEvent(e);
+    if (!dir) return;
+    e.stopPropagation();
+    const i = held.indexOf(dir);
+    if (i >= 0) held.splice(i, 1);
+  });
+  pet.addEventListener('blur', () => (held.length = 0));
 
   let eatTimer: ReturnType<typeof setTimeout> | undefined;
   function apply() {
     clearTimeout(eatTimer);
     const mood = currentMood();
-    sprite.setAnimation(spriteName(mood));
+    sprite.setAnimation(walkAnim ?? spriteName(mood));
     pet.setAttribute(
       'aria-label',
       napping

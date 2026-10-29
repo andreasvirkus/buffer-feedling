@@ -49,7 +49,7 @@ export function createPanel(parent: ParentNode, opts: { id: string; onNap: (napp
   row.append(open, nap);
   const tip = Object.assign(document.createElement('p'), {
     className: 'tip',
-    textContent: 'Drag me anywhere, or focus me and use the arrow keys.',
+    textContent: 'Drag me anywhere, or focus me and walk me around with the arrow keys or WASD.',
   });
   el.append(title, status, row, tip);
   parent.append(el);
