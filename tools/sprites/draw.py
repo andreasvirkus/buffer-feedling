@@ -199,6 +199,49 @@ def sproutling(state, squash=0, leaf_dx=0, leaf_dy=0, droop=0, blink=False, mout
     return s.image()
 
 
+def walker(facing, phase):
+    """One frame of the 4-phase walk cycle. facing: down (towards us), up, left, right.
+    Phases: 0 contact, 1 first foot passing (body rises), 2 contact, 3 other foot passing."""
+    s = Sprite()
+    flip = facing == "left"
+    cx = (lambda x: 32 - x) if flip else (lambda x: x)               # ellipse centres
+    px = (lambda x, w=1: 31 - x - (w - 1)) if flip else (lambda x, w=1: x)  # pixel runs
+    odd = phase % 2 == 1
+    bob = -1 if odd else 0                                           # body rises mid-step
+    side = facing in ("left", "right")
+
+    if not side:
+        s.ellipse(12, 25 if phase == 1 else 27, 2.6, 1.8, "mint")    # feet
+        s.ellipse(20, 25 if phase == 3 else 27, 2.6, 1.8, "mint")
+        s.ellipse(16, 19 + bob, 10, 8.5, "mint")                     # body
+        s.ellipse(6.5, 20 + bob + (-1 if phase == 3 else 0), 2, 1.6, "mint")    # arms swing against the feet
+        s.ellipse(25.5, 20 + bob + (-1 if phase == 1 else 0), 2, 1.6, "mint")
+        sway = (0, 1, 0, -1)[phase]
+        lx, ly = sway, 0
+    else:
+        feet = [((11, 27), (21, 27)), ((15, 25), (20, 27)), ((20, 27), (12, 27)), ((20, 27), (15, 25))][phase]
+        for fx, fy in feet:
+            s.ellipse(cx(fx), fy, 2.6, 1.8, "mint")
+        s.ellipse(cx(15.5), 19 + bob, 9.5, 8.5, "mint")
+        s.ellipse(cx((18, 16, 13, 16)[phase]), 20 + bob, 2, 1.6, "mint")   # one visible arm, swinging
+        lx, ly = (-1 if flip else 1), (1 if odd else 0)
+
+    s.ellipse(cx(16 + lx), 10 + ly, 0.9, 1.8, "leaf")                # stem
+    s.ellipse(cx(12.5 + lx), 7.5 + ly, 3.2, 1.7, "leaf")             # leaves
+    s.ellipse(cx(19.5 + lx), 6.5 + ly, 3.2, 1.7, "leaf")
+    s.shade()
+
+    if facing == "down":
+        s.eye(12, 17 + bob); s.eye(19, 17 + bob)
+        s.smile(14, 21 + bob, 4)
+        s.blush([(10, 20 + bob), (11, 20 + bob), (21, 20 + bob), (22, 20 + bob)])
+    elif side:
+        s.eye(px(18, 2), 17 + bob); s.eye(px(22, 2), 17 + bob)
+        s.dots([(px(20), 21 + bob), (px(21), 22 + bob), (px(22), 22 + bob), (px(23), 21 + bob)], OUT)
+        s.blush([(px(17), 20 + bob), (px(24), 20 + bob)])
+    return s.image()
+
+
 def chomp(state):
     s = Sprite()
     s.ellipse(10, 13, 4, 4, "purple")                 # eye bumps
@@ -329,6 +372,8 @@ ANIMATIONS = {
         (dict(mouth=0.7, squash=1), 120),
     ]),
 }
+WALK_FRAME_MS = 120
+WALK_DIRS = ["down", "up", "left", "right"]
 BLINK = dict(blink=True)
 BLINK_EVERY_MS = 4000
 BLINK_MS = 120
@@ -344,11 +389,14 @@ def build_all():
         bg.alpha_composite(img)
         return bg.convert("RGB").resize((N * SCALE, N * SCALE), Image.NEAREST)
 
+    items = []
     for name, anim in ANIMATIONS.items():
-        state, spec = anim["state"], anim["frames"]
-        has_blink = name == "idle"
+        items.append((name, [sproutling(anim["state"], **kw) for kw, _ in anim["frames"]], [ms for _, ms in anim["frames"]], name == "idle", anim["state"]))
+    for d in WALK_DIRS:
+        items.append((f"walk-{d}", [walker(d, p) for p in range(4)], [WALK_FRAME_MS] * 4, False, None))
 
-        frames = [sproutling(state, **kw) for kw, _ in spec]
+    for name, frames, durations, has_blink, state in items:
+        spec = [(None, ms) for ms in durations]
         frames[0].save(SPRITES / f"sproutling-{name}.png")
         if has_blink:
             frames.append(sproutling(state, **BLINK))
