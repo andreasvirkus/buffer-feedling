@@ -3,6 +3,7 @@ import { allSitePatterns, grantedServices, isVisitable, sitePatterns } from './s
 
 describe('sites', () => {
   it('maps a service to its patterns', () => expect(sitePatterns('linkedin')).toEqual(['*://*.linkedin.com/*']));
+  it('includes Substack', () => expect(sitePatterns('substack')).toEqual(['*://*.substack.com/*']));
   it('covers both X domains', () => expect(sitePatterns('twitter')).toHaveLength(2));
   it('returns nothing for services without a fixed domain', () => {
     expect(sitePatterns('mastodon')).toEqual([]);

@@ -49,6 +49,7 @@ const SERVICE_LABEL: Record<string, string> = {
   googlebusiness: 'Google Business',
   tiktok: 'TikTok',
   youtube: 'YouTube',
+  substack: 'Substack',
 };
 const serviceLabel = (s: string) => SERVICE_LABEL[s] ?? s[0]!.toUpperCase() + s.slice(1);
 

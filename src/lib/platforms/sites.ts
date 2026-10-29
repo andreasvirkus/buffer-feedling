@@ -9,6 +9,7 @@ export const SITES: Record<string, string[]> = {
   youtube: ['*://*.youtube.com/*'],
   pinterest: ['*://*.pinterest.com/*'],
   bluesky: ['*://bsky.app/*'],
+  substack: ['*://*.substack.com/*'],
 };
 
 export const sitePatterns = (service: string): string[] => SITES[service] ?? [];

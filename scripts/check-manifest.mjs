@@ -11,6 +11,8 @@ if (!same(m.host_permissions ?? [], ['https://auth.buffer.com/*', 'https://api.b
 if (!same(m.permissions ?? [], ['storage', 'alarms', 'scripting', 'offscreen'])) {
   problems.push(`unexpected permissions: ${JSON.stringify(m.permissions)}`);
 }
+const scripts = (m.content_scripts ?? []).flatMap((c) => c.matches);
+if (!same(scripts, ['*://publish.buffer.com/*', '*://sproutling.pet/*'])) problems.push(`unexpected content script matches: ${JSON.stringify(scripts)}`);
 if (!(m.optional_host_permissions ?? []).length) problems.push('optional_host_permissions is empty');
 if (process.env.STORE_BUILD && m.key) problems.push('the store build must not carry the pinned key');
 
