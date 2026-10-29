@@ -70,15 +70,15 @@ def build_banner():
     d = ImageDraw.Draw(img)
 
     OY = 36  # centres the block vertically
-    d.text((W // 2, 105 + OY), "Sproutling", font=font(TITLE_FONT, 92), fill=OUT, anchor="mm")
-    d.text((W // 2, 185 + OY), "Post a little. Pause a little.", font=font(BODY_FONT, 36), fill=MUTED, anchor="mm")
+    d.text((W // 2, 100 + OY), "Sproutling", font=font(TITLE_FONT, 84), fill=OUT, anchor="mm")
+    d.text((W // 2, 186 + OY), "Post a little. Pause a little.", font=font(TITLE_FONT, 50), fill=ACCENT, anchor="mm")
 
     moods = ["hungry", "idle", "full", "sleepy", "eating"]
     labels = ["hungry", "content", "full", "sleepy", "eating"]
     cell = 32 * K
     gap = 44
     x0 = (W - (len(moods) * cell + (len(moods) - 1) * gap)) // 2
-    top = 250 + OY
+    top = 268 + OY
     label_font = font(BODY_FONT, 28)
     for i, (m, label) in enumerate(zip(moods, labels)):
         x = x0 + i * (cell + gap)
@@ -144,6 +144,10 @@ def heading(d, W, title, sub, y=70):
     d.text((W // 2, y + 66), sub, font=font(BODY_FONT, 30), fill=MUTED, anchor="mm")
 
 
+def footer(d, W=1280, H=800):
+    d.text((W // 2, H - 38), "Sproutling  \u00b7  Post a little. Pause a little.", font=font(BODY_FONT, 26), fill=MUTED, anchor="mm")
+
+
 def canvas(W=1280, H=800, bg=CREAM):
     img = Image.new("RGBA", (W, H), bg + (255,))
     return img, ImageDraw.Draw(img)
@@ -151,11 +155,13 @@ def canvas(W=1280, H=800, bg=CREAM):
 
 def shot_meet():
     img, d = canvas()
-    d.text((110, 215), "Meet", font=font(TITLE_FONT, 60), fill=MUTED, anchor="lm")
-    d.text((110, 300), "Sproutling", font=fit(d, "Sproutling", TITLE_FONT, 96, 500), fill=OUT, anchor="lm")
-    body = font(BODY_FONT, 34)
-    for i, line in enumerate(wrap(d, "A calm little pet that remembers your streak with you, and has a kind word when the scrolling goes on.", body, 500)):
-        d.text((110, 405 + i * 50), line, font=body, fill=MUTED, anchor="lm")
+    d.text((110, 175), "Sproutling", font=font(TITLE_FONT, 46), fill=ACCENT, anchor="lm")
+    big = fit(d, "Pause a little.", TITLE_FONT, 92, 510)
+    d.text((110, 270), "Post a little.", font=big, fill=OUT, anchor="lm")
+    d.text((110, 370), "Pause a little.", font=big, fill=OUT, anchor="lm")
+    body = font(BODY_FONT, 32)
+    for i, line in enumerate(wrap(d, "A tiny pixel pet that keeps you company in your browser, and has a kind word when the scrolling goes on.", body, 500)):
+        d.text((110, 470 + i * 46), line, font=body, fill=MUTED, anchor="lm")
     img.alpha_composite(tile((560, 560), MINT + (255,), 40), (660, 120))
     shadowed(img, d, 660 + 24, 120 + 24, 16)
     return img
@@ -176,6 +182,7 @@ def shot_moods():
         shadowed(img, d, x, 340, K, m)
         d.text((x + cell // 2, 570), lab, font=font(TITLE_FONT, 34), fill=OUT, anchor="mm")
         d.text((x + cell // 2, 616), note, font=font(BODY_FONT, 24), fill=MUTED, anchor="mm")
+    footer(d)
     return img
 
 
@@ -199,6 +206,7 @@ def shot_nudge():
     pixel_card(d, [bx1 - bw, by1 - bh, bx1, by1], offset=6)
     for i, line in enumerate(lines):
         d.text((bx1 - bw + 28, by1 - bh + 38 + i * 42), line, font=fnt, fill=OUT, anchor="lm")
+    footer(d)
     tail_x = bx1 - 70
     d.polygon([(tail_x, by1 - 2), (tail_x + 26, by1 - 2), (tail_x + 26, by1 + 22)], fill=PAPER, outline=OUT)
     d.line([(tail_x, by1 - 2), (tail_x + 26, by1 - 2)], fill=PAPER, width=4)
@@ -237,7 +245,8 @@ def shot_sites():
         if on:
             d.line([(cx + 16, cy + 23), (cx + 23, cy + 30), (cx + 36, cy + 14)], fill=ACCENT, width=4, joint="curve")
         cx += w + 12
-    d.text((x0 + 28, y0 + 500), "Tap a channel to let Sproutling visit its site.", font=font(BODY_FONT, 21), fill=MUTED, anchor="lm")
+    d.text((x0 + 28, y0 + 500), "Tap a site to let Sproutling visit it.", font=font(BODY_FONT, 21), fill=MUTED, anchor="lm")
+    footer(d)
     return img
 
 
