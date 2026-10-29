@@ -23,7 +23,7 @@ Post something and it perks up. Let your queue run dry and it gets hungry. Disap
 WHAT IT DOES
 
 • Sits in the corner of the Buffer app and shows how your week of posting is going, with five moods and a little animation for each.
-• Visits the sites of your connected channels (LinkedIn, X, Instagram, Facebook, Threads, TikTok, YouTube, Pinterest and Bluesky), one site at a time, and only when you allow it.
+• Visits the sites of your connected channels (LinkedIn, X, Instagram, Facebook, Threads, TikTok, YouTube, Pinterest, Bluesky and Substack), one site at a time, and only when you allow it.
 • Offers a kind word in a speech bubble when you've been scrolling for a good while, such as "Let's pause and reflect on what we've consumed." It starts chatty and eases off, and there's a switch to turn it off.
 • Works without Buffer too: choose the sites you scroll on and it keeps you company there, with the same nudges.
 • Can be dragged anywhere, or walked around the page with the arrow keys or WASD, and remembers its spot on each site. Click it for a small panel with a link back to Buffer and a nap button.
@@ -83,7 +83,7 @@ Used only to renew the user's Buffer sign-in. Buffer's token endpoint accepts re
 **Host permission justification**
 
 ```
-auth.buffer.com and api.buffer.com: Buffer's sign-in and token endpoints and its read-only API (account, channels, posts, ideas), used to work out the pet's mood. The content script on publish.buffer.com shows the pet in the Buffer web app. Social sites (LinkedIn, X, Instagram, Facebook, Threads, TikTok, YouTube, Pinterest, Bluesky) are optional permissions, requested one site at a time when the user taps that site in the popup. The extension never reads page content.
+auth.buffer.com and api.buffer.com: Buffer's sign-in and token endpoints and its read-only API (account, channels, posts, ideas), used to work out the pet's mood. The content script on publish.buffer.com shows the pet in the Buffer web app, and on sproutling.pet, our own site, as a live demo. Social sites (LinkedIn, X, Instagram, Facebook, Threads, TikTok, YouTube, Pinterest, Bluesky, Substack) are optional permissions, requested one site at a time when the user taps that site in the popup. The extension never reads page content.
 ```
 
 **Remote code**: No, I am not using remote code. All code ships in the package.
