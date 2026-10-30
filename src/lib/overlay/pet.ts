@@ -253,7 +253,7 @@ export async function mountPet({ nudges = false, ctx }: { nudges?: boolean; ctx?
         : !connected
           ? 'Sproutling is keeping you company'
           : state
-            ? `Sproutling is ${mood}: ${state.sent} of ${state.target} posts this week`
+            ? `Sproutling is ${mood}: ${state.sent} of ${state.target} posts`
             : 'Sproutling is waking up',
     );
     if (panel.isOpen) panel.update(state, mood, napping, connected);

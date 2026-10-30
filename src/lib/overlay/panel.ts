@@ -74,7 +74,7 @@ export function createPanel(parent: ParentNode, opts: { id: string; onNap: (napp
         : !connected
           ? 'Keeping you company. Connect Buffer from the toolbar icon and I\u2019ll watch your streak too.'
           : state
-          ? `Feeling ${FEELING[mood]}. ${state.sent} of ${state.target} posts this week.`
+          ? `Feeling ${FEELING[mood]}. ${state.sent} of ${state.target} posts.`
           : 'Waiting to be connected.';
       nap.textContent = isNapping ? 'Wake me up' : 'Let me nap';
     },

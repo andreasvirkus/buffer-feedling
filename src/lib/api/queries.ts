@@ -51,10 +51,24 @@ export const POLL_QUERY = /* GraphQL */ `
         }
       }
     }
-    scheduled: posts(first: 50, input: { organizationId: $org, filter: { status: [scheduled] } }) {
+    scheduled: posts(
+      first: 50
+      input: { organizationId: $org, filter: { status: [scheduled] }, sort: [{ field: dueAt, direction: asc }] }
+    ) {
       edges {
         node {
           id
+          dueAt
+        }
+      }
+    }
+    lastSent: posts(
+      first: 1
+      input: { organizationId: $org, filter: { status: [sent] }, sort: [{ field: dueAt, direction: desc }] }
+    ) {
+      edges {
+        node {
+          sentAt
         }
       }
     }

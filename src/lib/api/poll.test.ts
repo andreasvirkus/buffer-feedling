@@ -10,6 +10,7 @@ const empty = (): PollData => ({
   sent: { edges: [] },
   recent: { edges: [] },
   scheduled: { edges: [] },
+  lastSent: { edges: [] },
   ideas: { edges: [] },
 });
 const ctx = { now: NOW, connectedAt: null };
@@ -61,8 +62,40 @@ describe('toPetInputs', () => {
 
   it('counts scheduled posts for the fridge fallback', () => {
     const d = empty();
-    d.scheduled.edges = [{ node: { id: 'a' } }, { node: { id: 'b' } }];
+    d.scheduled.edges = [{ node: { id: 'a', dueAt: null } }, { node: { id: 'b', dueAt: null } }];
     expect(toPetInputs(d, ctx).scheduledPosts).toBe(2);
+  });
+
+  it('finds the soonest scheduled post', () => {
+    const d = empty();
+    d.scheduled.edges = [
+      { node: { id: 'a', dueAt: new Date(NOW + 5 * HOUR).toISOString() } },
+      { node: { id: 'b', dueAt: new Date(NOW + 2 * HOUR).toISOString() } },
+    ];
+    expect(toPetInputs(d, ctx).nextScheduledAt).toBe(NOW + 2 * HOUR);
+  });
+
+  it('has no next time when nothing is scheduled or the time is missing', () => {
+    expect(toPetInputs(empty(), ctx).nextScheduledAt).toBeNull();
+    const d = empty();
+    d.scheduled.edges = [{ node: { id: 'a', dueAt: null } }];
+    expect(toPetInputs(d, ctx).nextScheduledAt).toBeNull();
+  });
+
+  it('reads the last sent post even when it is older than the 7 day window', () => {
+    const d = empty();
+    d.lastSent.edges = [{ node: { sentAt: new Date(NOW - 20 * 24 * HOUR).toISOString() } }];
+    const i = toPetInputs(d, ctx);
+    expect(i.lastSentAt).toBe(NOW - 20 * 24 * HOUR);
+    expect(i.sentLast7d).toBe(0);
+  });
+
+  it('has no last sent time for an account that never sent', () => expect(toPetInputs(empty(), ctx).lastSentAt).toBeNull());
+
+  it('counts the ideas waiting', () => {
+    const d = empty();
+    d.ideas.edges = [{ node: { createdAt: 1 } }, { node: { createdAt: 2 } }, { node: { createdAt: 3 } }];
+    expect(toPetInputs(d, ctx).ideasWaiting).toBe(3);
   });
 });
 

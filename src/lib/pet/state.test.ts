@@ -129,6 +129,26 @@ describe('metadata', () => {
   });
 });
 
+describe('what the popup shows', () => {
+  it('knows whether posting goals are in use', () => {
+    expect(run({}).hasGoals).toBe(false);
+    expect(run({ goals: [goal(3, 1)] }).hasGoals).toBe(true);
+    expect(run({ goals: [goal(0, 1)] }).hasGoals).toBe(false);
+  });
+  it('carries the last post, next scheduled time and waiting ideas through', () => {
+    const s = run({ lastSentAt: NOW - 3600_000, nextScheduledAt: NOW + 7200_000, ideasWaiting: 4 });
+    expect(Date.parse(s.lastSentAt!)).toBe(NOW - 3600_000);
+    expect(Date.parse(s.nextDueAt!)).toBe(NOW + 7200_000);
+    expect(s.ideasWaiting).toBe(4);
+  });
+  it('leaves them out when unknown', () => {
+    const s = run({});
+    expect(s.lastSentAt).toBeUndefined();
+    expect(s.nextDueAt).toBeUndefined();
+    expect(s.ideasWaiting).toBe(0);
+  });
+});
+
 describe('spriteName / petLabel', () => {
   it('maps content to the idle sheet and leaves the others alone', () => {
     expect(spriteName('content')).toBe('idle');
@@ -136,7 +156,7 @@ describe('spriteName / petLabel', () => {
   });
   it('describes progress, and the not-connected case', () => {
     const s = run({ goals: [goal(5, 2)] });
-    expect(petLabel(s, 'content')).toBe('Sproutling: content, 2 of 5 posts this week');
+    expect(petLabel(s, 'content')).toBe('Sproutling: content, 2 of 5 posts');
     expect(petLabel(undefined, 'sleepy')).toContain('waiting');
   });
 });

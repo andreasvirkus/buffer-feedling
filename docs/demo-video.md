@@ -30,7 +30,7 @@ Times are targets. Voiceover is ~270 words in total, about 150 words a minute.
 
 ### 3. Real data (0:34 to 0:52)
 
-- **Screen:** popup with fullness, fridge, snacks. Cut to `chrome://extensions`, Sproutling, **Inspect views: service worker**, Network tab filtered on `api.buffer.com`. Click **Refresh** in the popup and show the GraphQL request returning 200 (hold 3 s). Back to the Buffer app with the hungry pet.
+- **Screen:** popup with the fullness bar and its three lines (last post, what's scheduled, ideas waiting). Cut to `chrome://extensions`, Sproutling, **Inspect views: service worker**, Network tab filtered on `api.buffer.com`. Click **Refresh** in the popup and show the GraphQL request returning 200 (hold 3 s). Back to the Buffer app with the hungry pet.
 - **VO:** "Every fifteen minutes it makes one call to the Buffer API: posting goals, what's been sent, what's scheduled, drafts and ideas. Those are the real requests. It turns all of that into a mood, and this week I'm behind, so Sproutling is hungry."
 
 ### 4. Feed it (0:52 to 1:12)

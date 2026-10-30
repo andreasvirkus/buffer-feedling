@@ -10,7 +10,8 @@ export interface PollData {
   }[];
   sent: { edges: { node: { sentAt: string | null } }[] };
   recent: { edges: { node: { status: string; createdAt: string } }[] };
-  scheduled: { edges: { node: { id: string } }[] };
+  scheduled: { edges: { node: { id: string; dueAt: string | null } }[] };
+  lastSent: { edges: { node: { sentAt: string | null } }[] }; // newest sent post, however old
   ideas: { edges: { node: { createdAt: number } }[] }; // unix seconds
 }
 
@@ -42,6 +43,9 @@ export function toPetInputs(
   const recent = data.recent.edges.map((e) => ({ status: e.node.status, at: Date.parse(e.node.createdAt) }));
   const ideaTimes = data.ideas.edges.map((e) => e.node.createdAt * 1000);
 
+  const lastSentAt = Date.parse(data.lastSent.edges[0]?.node.sentAt ?? '');
+  const dueTimes = data.scheduled.edges.map((e) => Date.parse(e.node.dueAt ?? '')).filter((t) => Number.isFinite(t));
+
   const activity = [...sentTimes, ...recent.map((p) => p.at), ...ideaTimes].filter((t) => Number.isFinite(t));
 
   return {
@@ -52,6 +56,9 @@ export function toPetInputs(
     draftsToday: recent.filter((p) => p.status === 'draft' && p.at >= today).length,
     ideasToday: ideaTimes.filter((t) => t >= today).length,
     lastActivityAt: activity.length ? Math.max(...activity) : null,
+    lastSentAt: Number.isFinite(lastSentAt) ? lastSentAt : null,
+    nextScheduledAt: dueTimes.length ? Math.min(...dueTimes) : null,
+    ideasWaiting: ideaTimes.length,
     connectedAt: ctx.connectedAt,
     lastFedAt: ctx.lastFedAt,
     services: live.map((c) => c.service).filter((s) => s !== 'startPage'),

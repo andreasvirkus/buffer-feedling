@@ -10,6 +10,10 @@ export interface PetState {
   sent: number; // posts counted toward fullness
   target: number; // what `sent` is measured against
   age: number; // days since first connect
+  hasGoals: boolean; // false means the default weekly target is in use
+  lastSentAt?: string; // newest sent post, ISO
+  nextDueAt?: string; // soonest scheduled post, ISO
+  ideasWaiting: number; // capped by how many the poll asks for
   lastFedAt?: string;
   connectedServices: string[];
   updatedAt: string;
@@ -29,6 +33,9 @@ export interface PetInputs {
   draftsToday: number;
   ideasToday: number;
   lastActivityAt: number | null;
+  lastSentAt?: number | null;
+  nextScheduledAt?: number | null;
+  ideasWaiting?: number;
   connectedAt: number | null;
   lastFedAt?: number; // ms
   services: string[];
@@ -70,6 +77,10 @@ export function computePetState(i: PetInputs): PetState {
     treats: i.ideasToday,
     sent,
     target,
+    hasGoals,
+    lastSentAt: i.lastSentAt ? new Date(i.lastSentAt).toISOString() : undefined,
+    nextDueAt: i.nextScheduledAt ? new Date(i.nextScheduledAt).toISOString() : undefined,
+    ideasWaiting: i.ideasWaiting ?? 0,
     age: i.connectedAt === null ? 0 : Math.max(0, Math.floor((i.now - i.connectedAt) / DAY_MS)),
     lastFedAt: i.lastFedAt === undefined ? undefined : new Date(i.lastFedAt).toISOString(),
     connectedServices: [...new Set(i.services)],
@@ -85,4 +96,4 @@ export const displayMood = (s: PetState, now: number): Mood =>
 export const spriteName = (m: Mood): string => (m === 'content' ? 'idle' : m);
 
 export const petLabel = (s: PetState | undefined, mood: Mood): string =>
-  s ? `Sproutling: ${mood}, ${s.sent} of ${s.target} posts this week` : 'Sproutling: waiting to be connected';
+  s ? `Sproutling: ${mood}, ${s.sent} of ${s.target} posts` : 'Sproutling: waiting to be connected';

@@ -2,6 +2,7 @@ import type { PollMeta } from '@/lib/poller';
 import { spriteName, type Mood, type PetState } from '@/lib/pet/state';
 import { send, type ConnectionStatus } from '@/lib/messages';
 import { onboardingStep, type Onboarding } from '@/lib/onboarding';
+import { factLines, targetNote } from '@/lib/pet/facts';
 import { SITES, grantedServices, isVisitable, sitePatterns } from '@/lib/platforms/sites';
 
 const app = document.querySelector<HTMLElement>('#app')!;
@@ -206,25 +207,15 @@ async function render() {
       h(
         'div',
         { className: 'card' },
-        h('div', { className: 'meter-head' }, h('span', { textContent: 'Fullness' }), h('span', { textContent: `${sent} of ${target} posts · ${pct(fullness)}` })),
+        h('div', { className: 'meter-head' }, h('span', { textContent: 'Fullness' }), h('span', { textContent: `${sent} of ${target} posts` })),
         h(
           'div',
           { className: 'meter', attrs: { role: 'meter', 'aria-label': 'Fullness', 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-valuenow': String(Math.round(fullness * 100)) } },
           Object.assign(h('div'), { style: `width:${pct(fullness)}` }),
         ),
+        h('p', { className: 'meter-note', textContent: targetNote(petState) }),
       ),
-      h(
-        'dl',
-        { className: 'card stats' },
-        ...(
-          [
-            ['Fridge', petState.fridge],
-            ['Snacks', petState.snacksToday],
-            ['Treats', petState.treats],
-            ['Days', petState.age],
-          ] as const
-        ).map(([k, v]) => h('div', {}, h('dt', { textContent: k }), h('dd', { textContent: String(v) }))),
-      ),
+      h('ul', { className: 'card facts', attrs: { 'aria-label': 'Right now' } }, ...factLines(petState, Date.now()).map((line) => h('li', { textContent: line }))),
     );
     const sitesNodes = await sitesBlock(petState.connectedServices, 'Connected channels');
     nodes.push(
