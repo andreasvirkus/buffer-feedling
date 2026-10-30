@@ -173,6 +173,11 @@ export async function mountPet({ nudges = false } = {}) {
   }
 
   pet.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && panel.isOpen) {
+      e.stopPropagation();
+      closePanel();
+      return;
+    }
     if (e.altKey || e.ctrlKey || e.metaKey) return;
     const dir = dirFromEvent(e);
     if (!dir) return;
