@@ -105,7 +105,7 @@ All of it stays on the device. Only the first two exist at all once the user con
 ## Before you submit
 
 1. Create the item as a draft first and upload the zip (`pnpm zip`, output in `.output/`), visibility **Unlisted** for the early submission.
-2. **Check the extension ID the store assigns.** The sign-in and refresh pages hard-code `ecmbcebdlcbhgggjgdnokhlllblbongm` (`site/callback.js`, `site/refresh.js`). If the store gives a different ID, update both files and the Buffer redirect settings. If the dashboard shows a public key for the item, putting it in the manifest `key` keeps the ID stable for local testing.
+2. **Extension ID**: the store assigned `dndkfdgjaokpffieimgaoheogiohinmn` (the local build keeps the pinned `ecmbcebdlcbhgggjgdnokhlllblbongm`). `site/callback.js` and `site/refresh.js` accept both; a new store item or a new key means adding the ID there.
 3. Test the packaged build from a clean profile: connect, refresh (wait for a token to expire), allow a channel site, scroll for a nudge, drag, nap, disconnect.
 4. Re-read the Privacy tab answers against the manifest before submitting.
 5. The name is just "Sproutling", but the summary and description mention Buffer. That is descriptive use; check with the team if unsure.

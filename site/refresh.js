@@ -1,12 +1,17 @@
 // Runs inside the extension's offscreen document. Buffer's token endpoint only accepts this origin,
 // so the extension hands over its refresh token, we call /token, and the result goes straight back.
-const EXTENSION_ORIGIN = 'chrome-extension://ecmbcebdlcbhgggjgdnokhlllblbongm';
+// Chrome Web Store build, and the local build with the pinned key
+const EXTENSION_ORIGINS = [
+  'chrome-extension://dndkfdgjaokpffieimgaoheogiohinmn',
+  'chrome-extension://ecmbcebdlcbhgggjgdnokhlllblbongm',
+];
 const TOKEN_URL = 'https://auth.buffer.com/token';
 
 addEventListener('message', async (e) => {
-  if (e.origin !== EXTENSION_ORIGIN || e.source !== parent || e.data?.type !== 'refresh') return;
+  if (!EXTENSION_ORIGINS.includes(e.origin) || e.source !== parent || e.data?.type !== 'refresh') return;
   const { refreshToken, clientId } = e.data;
-  const reply = (body) => parent.postMessage({ type: 'result', ...body }, EXTENSION_ORIGIN);
+  // Answer only the origin that asked
+  const reply = (body) => parent.postMessage({ type: 'result', ...body }, e.origin);
 
   try {
     const res = await fetch(TOKEN_URL, {
@@ -25,4 +30,5 @@ addEventListener('message', async (e) => {
   }
 });
 
-parent.postMessage({ type: 'ready' }, EXTENSION_ORIGIN);
+// The ping carries nothing sensitive; a mismatched target origin simply drops it
+for (const origin of EXTENSION_ORIGINS) parent.postMessage({ type: 'ready' }, origin);
