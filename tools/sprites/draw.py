@@ -219,7 +219,9 @@ def walker(facing, phase):
         sway = (0, 1, 0, -1)[phase]
         lx, ly = sway, 0
     else:
-        feet = [((11, 27), (21, 27)), ((15, 25), (20, 27)), ((20, 27), (12, 27)), ((20, 27), (15, 25))][phase]
+        # One foot plants and slides back under the body while the other swings forward, then they swap
+        stride = [(20, 27), (14, 27), (15, 25), (19, 26)]
+        feet = (stride[phase], stride[(phase + 2) % 4])
         for fx, fy in feet:
             s.ellipse(cx(fx), fy, 2.6, 1.8, "mint")
         s.ellipse(cx(15.5), 19 + bob, 9.5, 8.5, "mint")
