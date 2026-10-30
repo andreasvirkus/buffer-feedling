@@ -8,6 +8,13 @@
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
+    <button id="mute" type="button" aria-pressed="false" aria-label="Mute sounds" title="Mute sounds">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" />
+        <g class="on"><path d="M15.5 9a4 4 0 0 1 0 6" /><path d="M18 6.5a7.5 7.5 0 0 1 0 11" /></g>
+        <g class="off"><path d="M16 9.5l5 5" /><path d="M21 9.5l-5 5" /></g>
+      </svg>
+    </button>
     <main id="app"></main>
     <script type="module" src="./main.ts"></script>
   </body>

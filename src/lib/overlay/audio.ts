@@ -2,8 +2,9 @@ import { createBag } from '../pet/nudges';
 import { createMumbler } from './mumble';
 import { CHIRPS, STEPS, WALK_PHRASE } from './sound-data';
 
-const CHIRP_VOLUME = 0.5;
-const WALK_VOLUME = 0.35;
+const MASTER = 0.85; // one knob for every clip
+const CHIRP_VOLUME = 0.5 * MASTER;
+const WALK_VOLUME = 0.35 * MASTER;
 const FADE_S = 0.08; // stopping a mumble mid-way never clicks
 const RETRY_MS = 1000; // while the page hasn't been interacted with yet
 

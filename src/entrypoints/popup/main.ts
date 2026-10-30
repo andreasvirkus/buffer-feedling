@@ -99,7 +99,6 @@ function switchRow(key: string, title: string, hint: string, on: boolean) {
 
 const nudgeToggle = (on: boolean) =>
   switchRow('nudgesEnabled', 'Gentle nudges', 'A kind word now and then when you scroll for a long while.', on);
-const soundToggle = (on: boolean) => switchRow('soundsEnabled', 'Sounds', 'Little chirps when I speak, and footsteps when I walk.', on);
 
 const sprite = (mood: Mood) =>
   h(
@@ -136,7 +135,7 @@ function welcomeView(): Node[] {
   ];
 }
 
-async function sitesView(petState: PetState | undefined, nudgesOn: boolean, soundsOn: boolean): Promise<Node[]> {
+async function sitesView(petState: PetState | undefined, nudgesOn: boolean): Promise<Node[]> {
   const channels = status.connected ? (petState?.connectedServices ?? []) : [];
   const noChannels = status.connected && !!petState && !channels.length;
   const nodes: Node[] = [
@@ -153,7 +152,7 @@ async function sitesView(petState: PetState | undefined, nudgesOn: boolean, soun
     nodes.push(h('p', { className: 'hint', textContent: "Your Buffer account has no channels yet. Add some there and I'll learn where you post." }));
   }
   nodes.push(
-    nudgeToggle(nudgesOn), soundToggle(soundsOn),
+    nudgeToggle(nudgesOn),
     h('div', { className: 'stack' }, button('All set', () => void setOnboarding({ done: true }), true)),
     h('p', { className: 'hint', textContent: 'You can change all of this later from this popup.' }),
   );
@@ -161,7 +160,7 @@ async function sitesView(petState: PetState | undefined, nudgesOn: boolean, soun
 }
 
 async function render() {
-  const { petState, pollMeta, authError, nudgesOn, soundsOn, onboarding } = await readStored();
+  const { petState, pollMeta, authError, nudgesOn, onboarding } = await readStored();
   const nodes: Node[] = [];
 
   if (authError && !status.connected) nodes.push(h('p', { className: 'banner', textContent: `Couldn't connect: ${authError}`, attrs: { role: 'alert' } }));
@@ -170,7 +169,7 @@ async function render() {
   const hasUsed = !!petState || grantedServices((await browser.permissions.getAll()).origins ?? []).length > 0;
   const step = onboardingStep(onboarding, { connected: status.connected, hasUsed });
   if (step === 'welcome') return app.replaceChildren(...nodes, ...welcomeView());
-  if (step === 'sites') return app.replaceChildren(...nodes, ...(await sitesView(petState, nudgesOn, soundsOn)));
+  if (step === 'sites') return app.replaceChildren(...nodes, ...(await sitesView(petState, nudgesOn)));
 
   if (!status.connected) {
     nodes.push(
@@ -184,7 +183,7 @@ async function render() {
       h('h2', { className: 'section-title', textContent: 'No Buffer? Keep me company anyway' }),
       h('p', { className: 'hint', textContent: 'Pick the sites you scroll on and Sproutling will keep you company there, with a kind word when you scroll for a good while.' }),
       ...(await sitesBlock(Object.keys(SITES), 'Sites')),
-      nudgeToggle(nudgesOn), soundToggle(soundsOn),
+      nudgeToggle(nudgesOn),
     );
     return app.replaceChildren(...nodes);
   }
@@ -233,7 +232,7 @@ async function render() {
         ? sitesNodes
         : [h('p', { className: 'hint', textContent: "Your Buffer account has no channels yet. Add some there and I'll learn where you post." })]),
     );
-    nodes.push(nudgeToggle(nudgesOn), soundToggle(soundsOn));
+    nodes.push(nudgeToggle(nudgesOn));
     nodes.push(h('p', { className: 'foot', textContent: `Connected as ${status.account?.name ?? 'your Buffer account'} · updated ${ago(petState.updatedAt)}` }));
   } else {
     nodes.push(
@@ -271,6 +270,7 @@ browser.permissions.onRemoved.addListener(() => void render());
 
 browser.storage.onChanged.addListener((changes, area) => {
   if (area !== 'local') return;
+  if ('soundsEnabled' in changes) void syncMute();
   if ('account' in changes || 'authError' in changes) {
     void send({ type: 'GET_STATUS' }).then((r) => {
       if (r.ok) status = r.data;
@@ -280,6 +280,23 @@ browser.storage.onChanged.addListener((changes, area) => {
 });
 
 void browser.action.setBadgeText({ text: '' });
+
+// The mute button sits outside the rendered views, so it is kept in sync on its own
+const muteButton = document.querySelector<HTMLButtonElement>('#mute')!;
+
+async function syncMute() {
+  const { soundsEnabled } = await browser.storage.local.get('soundsEnabled');
+  const muted = soundsEnabled === false;
+  muteButton.setAttribute('aria-pressed', String(muted));
+  muteButton.title = muted ? 'Unmute sounds' : 'Mute sounds';
+  muteButton.setAttribute('aria-label', muteButton.title);
+}
+
+muteButton.onclick = async () => {
+  const { soundsEnabled } = await browser.storage.local.get('soundsEnabled');
+  await browser.storage.local.set({ soundsEnabled: soundsEnabled === false });
+};
+void syncMute();
 
 send({ type: 'GET_STATUS' }).then((r) => {
   if (r.ok) status = r.data;
