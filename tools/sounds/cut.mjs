@@ -24,10 +24,10 @@ const TAIL_PAD = 0.08;
 const PEAK_DB = -6; // every clip is normalised to this peak, leaving headroom for mp3 and mixing
 
 // How each take is named and cut. `ticks` glues a short "tk" onto the louder step that follows it.
-// `loop` turns a take of evenly spaced repeats into one seamless loop of all of them, at their own tempo.
+// `phrase` also writes one clip spanning all of the take's sounds, spaced as recorded.
 const TAKES = [
   { match: /^chirp/, prefix: 'chirp' },
-  { match: /^walking/, prefix: 'walk-loop', ticks: true, loop: true },
+  { match: /^walking/, prefix: 'step', ticks: true, phrase: 'walk-phrase' },
 ];
 
 const dryRun = process.argv.includes('--dry-run');
@@ -139,20 +139,18 @@ for (const f of files) {
   }
   const input = path.join(RAW_DIR, f);
   const clips = plan(input, take);
-  if (take.loop) {
-    const { duration } = sounds(input);
-    const loop = loopOf(input, clips, duration);
-    const name = `${take.prefix}.mp3`;
-    console.log(`${f}: loop of ${loop.repeats} repeats, ${(loop.period * 1000).toFixed(0)} ms apart`);
-    console.log(`  ${name.padEnd(14)} ${loop.cutStart.toFixed(2)}s to ${loop.cutEnd.toFixed(2)}s  (${(loop.cutEnd - loop.cutStart).toFixed(2)}s, peak ${loop.peak.toFixed(1)} dB -> ${PEAK_DB} dB)`);
-    if (!dryRun) exportClip(input, name, loop, { fade: 0.004, fadeIn: 0.004 });
-    continue;
-  }
   console.log(`${f}: ${clips.length} clip(s)`);
   for (const clip of clips) {
     counters[take.prefix] = (counters[take.prefix] ?? 0) + 1;
     const name = `${take.prefix}-${String(counters[take.prefix]).padStart(2, '0')}.mp3`;
     console.log(`  ${name.padEnd(14)} ${clip.cutStart.toFixed(2)}s to ${clip.cutEnd.toFixed(2)}s  (${(clip.cutEnd - clip.cutStart).toFixed(2)}s, peak ${clip.peak.toFixed(1)} dB -> ${PEAK_DB} dB)`);
-    if (!dryRun) exportClip(path.join(RAW_DIR, f), name, clip);
+    if (!dryRun) exportClip(input, name, clip);
+  }
+  if (take.phrase && clips.length > 1) {
+    const { duration } = sounds(input);
+    const phrase = loopOf(input, clips, duration);
+    const name = `${take.phrase}.mp3`;
+    console.log(`  ${name.padEnd(14)} ${phrase.cutStart.toFixed(2)}s to ${phrase.cutEnd.toFixed(2)}s  (${(phrase.cutEnd - phrase.cutStart).toFixed(2)}s, all ${phrase.repeats} together, ${(phrase.period * 1000).toFixed(0)} ms apart)`);
+    if (!dryRun) exportClip(input, name, phrase);
   }
 }
