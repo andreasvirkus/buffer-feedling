@@ -61,6 +61,17 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 
 `draw.py` also copies the sheets into `site/sprites/`, so the landing page stays self-contained. To preview it, run `pnpm site:dev`.
 
+### Sounds
+
+The voice effects are cut from raw takes recorded by hand (kept out of the repo and out of the extension).
+
+```sh
+node tools/sounds/cut.mjs            # raw takes in tools/sounds/raw -> mp3 clips in src/lib/overlay/sounds
+node tools/sounds/cut.mjs --dry-run  # just print the plan
+```
+
+It needs ffmpeg. It finds each sound by silence, keeps a short "tk" attached to the step that follows it, drops quiet noise, fades the edges and normalises every clip. `TAKES` at the top says how each take is named. The clips are bundled into the content scripts and played with WebAudio.
+
 `tools/sprites/preview.html` plays a sheet in the browser. Serve the repo root (`npx serve .`) and open `/tools/sprites/preview.html`.
 
 ## Layout
@@ -77,6 +88,8 @@ src/
   public/        sprites and icons, copied into the build
 site/            static landing page (plain HTML/CSS/JS, deploys as-is)
 tools/sprites/   Python sprite and brand generators
+tools/sounds/    ffmpeg script that cuts voice takes into clips
+tools/video/     title and end cards for the demo video
 docs/brand/      banner and logo
 ```
 

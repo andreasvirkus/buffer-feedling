@@ -9,3 +9,4 @@ web-ext.config.ts
 __pycache__
 .DS_Store
 .wrangler
+tools/sounds/raw/

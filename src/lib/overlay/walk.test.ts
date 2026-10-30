@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BUMP_CYCLES_MAX, BUMP_CYCLES_MIN, WALK_CYCLE_MS, WALK_SPEED_PX_S, createWalker, dirFromEvent, type Dir } from './walk';
+import { stepDue, stepRate, BUMP_CYCLES_MAX, BUMP_CYCLES_MIN, WALK_CYCLE_MS, WALK_SPEED_PX_S, createWalker, dirFromEvent, type Dir } from './walk';
 
 const view = { w: 1000, h: 800 };
 const size = { w: 64, h: 64 };
@@ -109,4 +109,15 @@ describe('hitting a wall', () => {
       expect(w.tick([dir], 16, view, size)).toMatchObject({ state: 'bumping', facing: dir });
     }
   });
+});
+
+describe('footsteps', () => {
+  it('steps straight away when the walk starts', () => expect(stepDue(null, 1000)).toBe(true));
+  it('then once per walk cycle', () => {
+    expect(stepDue(1000, 1000 + WALK_CYCLE_MS - 1)).toBe(false);
+    expect(stepDue(1000, 1000 + WALK_CYCLE_MS)).toBe(true);
+  });
+  it('speeds a long clip up to fit a cycle', () => expect(stepRate(0.6)).toBeCloseTo(1.25));
+  it('never slows a short clip down', () => expect(stepRate(0.3)).toBe(1));
+  it('caps how chipmunk it gets', () => expect(stepRate(2)).toBe(1.5));
 });

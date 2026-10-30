@@ -80,3 +80,10 @@ export function createWalker(random: () => number = Math.random) {
     },
   };
 }
+
+/** One footstep sound per walk cycle, starting the moment the walk does */
+export const stepDue = (lastAt: number | null, now: number, cycleMs = WALK_CYCLE_MS) => lastAt === null || now - lastAt >= cycleMs;
+
+/** Squeeze a footstep clip into one walk cycle so the sound keeps up with the feet, within reason */
+export const stepRate = (clipSeconds: number, cycleMs = WALK_CYCLE_MS) =>
+  Math.min(Math.max(clipSeconds / (cycleMs / 1000), 1), 1.5);

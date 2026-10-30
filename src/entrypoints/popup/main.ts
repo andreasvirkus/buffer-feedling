@@ -10,14 +10,22 @@ let status: ConnectionStatus = { connected: false };
 let flash: string | undefined;
 
 async function readStored() {
-  const { petState, pollMeta, authError, nudgesEnabled, onboarding } = (await browser.storage.local.get([
+  const { petState, pollMeta, authError, nudgesEnabled, soundsEnabled, onboarding } = (await browser.storage.local.get([
     'petState',
     'pollMeta',
     'authError',
     'nudgesEnabled',
+    'soundsEnabled',
     'onboarding',
-  ])) as { petState?: PetState; pollMeta?: PollMeta; authError?: string; nudgesEnabled?: boolean; onboarding?: Onboarding };
-  return { petState, pollMeta, authError, nudgesOn: nudgesEnabled !== false, onboarding };
+  ])) as {
+    petState?: PetState;
+    pollMeta?: PollMeta;
+    authError?: string;
+    nudgesEnabled?: boolean;
+    soundsEnabled?: boolean;
+    onboarding?: Onboarding;
+  };
+  return { petState, pollMeta, authError, nudgesOn: nudgesEnabled !== false, soundsOn: soundsEnabled !== false, onboarding };
 }
 
 const pct = (n: number) => `${Math.round(n * 100)}%`;
@@ -82,17 +90,16 @@ async function sitesBlock(services: string[], label: string): Promise<Node[]> {
   return nodes;
 }
 
-function nudgeToggle(on: boolean) {
+function switchRow(key: string, title: string, hint: string, on: boolean) {
   const input = h('input', { attrs: { type: 'checkbox', role: 'switch' } });
   input.checked = on;
-  input.onchange = () => void browser.storage.local.set({ nudgesEnabled: input.checked });
-  return h(
-    'label',
-    { className: 'toggle' },
-    h('span', {}, h('strong', { textContent: 'Gentle nudges' }), h('small', { textContent: 'A kind word now and then when you scroll for a long while.' })),
-    input,
-  );
+  input.onchange = () => void browser.storage.local.set({ [key]: input.checked });
+  return h('label', { className: 'toggle' }, h('span', {}, h('strong', { textContent: title }), h('small', { textContent: hint })), input);
 }
+
+const nudgeToggle = (on: boolean) =>
+  switchRow('nudgesEnabled', 'Gentle nudges', 'A kind word now and then when you scroll for a long while.', on);
+const soundToggle = (on: boolean) => switchRow('soundsEnabled', 'Sounds', 'Little chirps when I speak, and footsteps when I walk.', on);
 
 const sprite = (mood: Mood) =>
   h(
@@ -129,7 +136,7 @@ function welcomeView(): Node[] {
   ];
 }
 
-async function sitesView(petState: PetState | undefined, nudgesOn: boolean): Promise<Node[]> {
+async function sitesView(petState: PetState | undefined, nudgesOn: boolean, soundsOn: boolean): Promise<Node[]> {
   const channels = status.connected ? (petState?.connectedServices ?? []) : [];
   const noChannels = status.connected && !!petState && !channels.length;
   const nodes: Node[] = [
@@ -146,7 +153,7 @@ async function sitesView(petState: PetState | undefined, nudgesOn: boolean): Pro
     nodes.push(h('p', { className: 'hint', textContent: "Your Buffer account has no channels yet. Add some there and I'll learn where you post." }));
   }
   nodes.push(
-    nudgeToggle(nudgesOn),
+    nudgeToggle(nudgesOn), soundToggle(soundsOn),
     h('div', { className: 'stack' }, button('All set', () => void setOnboarding({ done: true }), true)),
     h('p', { className: 'hint', textContent: 'You can change all of this later from this popup.' }),
   );
@@ -154,7 +161,7 @@ async function sitesView(petState: PetState | undefined, nudgesOn: boolean): Pro
 }
 
 async function render() {
-  const { petState, pollMeta, authError, nudgesOn, onboarding } = await readStored();
+  const { petState, pollMeta, authError, nudgesOn, soundsOn, onboarding } = await readStored();
   const nodes: Node[] = [];
 
   if (authError && !status.connected) nodes.push(h('p', { className: 'banner', textContent: `Couldn't connect: ${authError}`, attrs: { role: 'alert' } }));
@@ -163,7 +170,7 @@ async function render() {
   const hasUsed = !!petState || grantedServices((await browser.permissions.getAll()).origins ?? []).length > 0;
   const step = onboardingStep(onboarding, { connected: status.connected, hasUsed });
   if (step === 'welcome') return app.replaceChildren(...nodes, ...welcomeView());
-  if (step === 'sites') return app.replaceChildren(...nodes, ...(await sitesView(petState, nudgesOn)));
+  if (step === 'sites') return app.replaceChildren(...nodes, ...(await sitesView(petState, nudgesOn, soundsOn)));
 
   if (!status.connected) {
     nodes.push(
@@ -177,7 +184,7 @@ async function render() {
       h('h2', { className: 'section-title', textContent: 'No Buffer? Keep me company anyway' }),
       h('p', { className: 'hint', textContent: 'Pick the sites you scroll on and Sproutling will keep you company there, with a kind word when you scroll for a good while.' }),
       ...(await sitesBlock(Object.keys(SITES), 'Sites')),
-      nudgeToggle(nudgesOn),
+      nudgeToggle(nudgesOn), soundToggle(soundsOn),
     );
     return app.replaceChildren(...nodes);
   }
@@ -226,7 +233,7 @@ async function render() {
         ? sitesNodes
         : [h('p', { className: 'hint', textContent: "Your Buffer account has no channels yet. Add some there and I'll learn where you post." })]),
     );
-    nodes.push(nudgeToggle(nudgesOn));
+    nodes.push(nudgeToggle(nudgesOn), soundToggle(soundsOn));
     nodes.push(h('p', { className: 'foot', textContent: `Connected as ${status.account?.name ?? 'your Buffer account'} · updated ${ago(petState.updatedAt)}` }));
   } else {
     nodes.push(
