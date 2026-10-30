@@ -70,7 +70,7 @@ node tools/sounds/cut.mjs            # raw takes in tools/sounds/raw -> mp3 clip
 node tools/sounds/cut.mjs --dry-run  # just print the plan
 ```
 
-It needs ffmpeg. It finds each sound by silence, keeps a short "tk" attached to the step that follows it, drops quiet noise, fades the edges and normalises every clip. `TAKES` at the top says how each take is named. The clips are bundled into the content scripts and played with WebAudio.
+It needs ffmpeg. It finds each sound by silence, keeps a short "tk" attached to the step that follows it, drops quiet noise, fades the edges and normalises every clip. The walking take becomes one seamless loop at its own tempo, which plays for as long as Sproutling walks. `TAKES` at the top says how each take is named. The clips are bundled into the content scripts and played with WebAudio.
 
 `tools/sprites/preview.html` plays a sheet in the browser. Serve the repo root (`npx serve .`) and open `/tools/sprites/preview.html`.
 

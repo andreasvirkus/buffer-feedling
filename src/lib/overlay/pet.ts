@@ -9,7 +9,7 @@ import { PANEL_CSS, createPanel } from './panel';
 import { DEFAULT_POS, clampPos, dragPos, isDrag, isPos, keyPos, popoverSide, type Pos } from './position';
 import { watchScroll } from './scroll-nudges';
 import { createSprite } from './sprite';
-import { createWalker, dirFromEvent, stepDue, type Dir, type WalkTick } from './walk';
+import { createWalker, dirFromEvent, type Dir, type WalkTick } from './walk';
 
 const CSS = `
   :host { all: initial; position: fixed; inset: 0; pointer-events: none; z-index: 2147483647; }
@@ -58,7 +58,15 @@ export async function mountPet({ nudges = false } = {}) {
   let nudgesOn = stored.nudgesEnabled !== false;
   let soundsOn = stored.soundsEnabled !== false;
   const sounds = createSounds();
-  const sound = (kind: 'chirp' | 'step') => soundsOn && !napping && void sounds.play(kind);
+  const chirp = () => soundsOn && !napping && void sounds.chirp();
+  let walkSound = false; // the loop plays for as long as it walks, whichever way it faces
+  const setWalkSound = (on: boolean) => {
+    const want = on && soundsOn && !napping;
+    if (want === walkSound) return;
+    walkSound = want;
+    if (want) void sounds.startWalk();
+    else sounds.stopWalk();
+  };
   const saved = (stored.petPositions as Record<string, unknown> | undefined)?.[location.hostname];
   let pos: Pos = isPos(saved) ? saved : DEFAULT_POS;
 
@@ -145,7 +153,7 @@ export async function mountPet({ nudges = false } = {}) {
   pet.addEventListener('click', () => {
     if (moved) moved = false;
     else {
-      sound('chirp');
+      chirp();
       togglePanel();
     }
   });
@@ -158,7 +166,6 @@ export async function mountPet({ nudges = false } = {}) {
   let walkAnim: string | null = null;
   let raf = 0;
   let lastFrame = 0;
-  let lastStepAt: number | null = null;
 
   function showWalk(t: WalkTick) {
     const anim = t.state === 'idle' ? null : `walk-${t.facing}`;
@@ -173,14 +180,11 @@ export async function mountPet({ nudges = false } = {}) {
     pos = t.pos;
     place();
     showWalk(t);
-    if (t.state === 'idle') lastStepAt = null;
-    else if (stepDue(lastStepAt, now)) {
-      lastStepAt = now;
-      sound('step');
-    }
+    setWalkSound(t.state !== 'idle');
     if (held.length || t.state !== 'idle') raf = requestAnimationFrame(frame);
     else {
       raf = 0;
+      setWalkSound(false);
       void savePos();
     }
   }
@@ -258,7 +262,7 @@ export async function mountPet({ nudges = false } = {}) {
       const line = hungry && Math.random() < 0.3 ? hungryBag() : bag();
       if (!line || panel.isOpen) return false;
       bubble.show(line);
-      sound('chirp');
+      chirp();
       return true;
     });
   }
@@ -266,10 +270,16 @@ export async function mountPet({ nudges = false } = {}) {
   browser.storage.onChanged.addListener((changes, area) => {
     if (area !== 'local') return;
     if ('nudgesEnabled' in changes) nudgesOn = changes.nudgesEnabled!.newValue !== false;
-    if ('soundsEnabled' in changes) soundsOn = changes.soundsEnabled!.newValue !== false;
+    if ('soundsEnabled' in changes) {
+      soundsOn = changes.soundsEnabled!.newValue !== false;
+      if (!soundsOn) setWalkSound(false);
+    }
     if ('napping' in changes) {
       napping = changes.napping!.newValue === true;
-      if (napping) bubble.hide();
+      if (napping) {
+        bubble.hide();
+        setWalkSound(false);
+      }
     }
     if ('petState' in changes) state = changes.petState!.newValue as PetState | undefined;
     if ('account' in changes) connected = !!changes.account!.newValue;

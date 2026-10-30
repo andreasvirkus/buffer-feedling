@@ -24,9 +24,10 @@ const TAIL_PAD = 0.08;
 const PEAK_DB = -6; // every clip is normalised to this peak, leaving headroom for mp3 and mixing
 
 // How each take is named and cut. `ticks` glues a short "tk" onto the louder step that follows it.
+// `loop` turns a take of evenly spaced repeats into one seamless loop of all of them, at their own tempo.
 const TAKES = [
   { match: /^chirp/, prefix: 'chirp' },
-  { match: /^walking/, prefix: 'step', ticks: true },
+  { match: /^walking/, prefix: 'walk-loop', ticks: true, loop: true },
 ];
 
 const dryRun = process.argv.includes('--dry-run');
@@ -97,14 +98,23 @@ function plan(input, take) {
   });
 }
 
-function exportClip(input, file, clip) {
+// One clip spanning every repeat, as long as the repeats are spaced evenly
+function loopOf(input, clips, duration) {
+  const starts = clips.map((c) => c.start);
+  const period = (starts.at(-1) - starts[0]) / (starts.length - 1);
+  const cutStart = Math.max(starts[0] - LEAD_PAD, 0);
+  const cutEnd = Math.min(cutStart + period * starts.length, duration);
+  return { cutStart, cutEnd, period, peak: peakDb(input, { start: cutStart, end: cutEnd }), repeats: starts.length };
+}
+
+function exportClip(input, file, clip, { fade = 0.04, fadeIn = 0.005 } = {}) {
   const length = clip.cutEnd - clip.cutStart;
   const gain = PEAK_DB - clip.peak;
   const r = run([
     '-y', '-loglevel', 'error',
     '-ss', String(clip.cutStart), '-i', input, '-t', String(length),
     // -ss before -i resets timestamps, so the fade times below are relative to the clip
-    '-af', `volume=${gain.toFixed(2)}dB,afade=t=in:st=0:d=0.005,afade=t=out:st=${Math.max(length - 0.04, 0)}:d=0.04`,
+    '-af', `volume=${gain.toFixed(2)}dB,afade=t=in:st=0:d=${fadeIn},afade=t=out:st=${Math.max(length - fade, 0)}:d=${fade}`,
     '-ac', '1', '-ar', '44100', '-codec:a', 'libmp3lame', '-b:a', '96k',
     path.join(OUT_DIR, file),
   ]);
@@ -127,7 +137,17 @@ for (const f of files) {
     console.log(`skip ${f}: no rule for it in TAKES`);
     continue;
   }
-  const clips = plan(path.join(RAW_DIR, f), take);
+  const input = path.join(RAW_DIR, f);
+  const clips = plan(input, take);
+  if (take.loop) {
+    const { duration } = sounds(input);
+    const loop = loopOf(input, clips, duration);
+    const name = `${take.prefix}.mp3`;
+    console.log(`${f}: loop of ${loop.repeats} repeats, ${(loop.period * 1000).toFixed(0)} ms apart`);
+    console.log(`  ${name.padEnd(14)} ${loop.cutStart.toFixed(2)}s to ${loop.cutEnd.toFixed(2)}s  (${(loop.cutEnd - loop.cutStart).toFixed(2)}s, peak ${loop.peak.toFixed(1)} dB -> ${PEAK_DB} dB)`);
+    if (!dryRun) exportClip(input, name, loop, { fade: 0.004, fadeIn: 0.004 });
+    continue;
+  }
   console.log(`${f}: ${clips.length} clip(s)`);
   for (const clip of clips) {
     counters[take.prefix] = (counters[take.prefix] ?? 0) + 1;
