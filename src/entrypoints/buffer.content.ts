@@ -6,7 +6,7 @@ const SITE_HOST = 'sproutling.pet';
 export default defineContentScript({
   matches: ['*://publish.buffer.com/*', `*://${SITE_HOST}/*`],
   excludeMatches: [`*://${SITE_HOST}/callback*`, `*://${SITE_HOST}/refresh*`],
-  main() {
-    return mountPet({ nudges: location.hostname === SITE_HOST });
+  main(ctx) {
+    return mountPet({ nudges: location.hostname === SITE_HOST, ctx });
   },
 });

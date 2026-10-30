@@ -5,7 +5,7 @@ import { mountPet } from '@/lib/overlay/pet';
 export default defineContentScript({
   registration: 'runtime',
   matches: [],
-  main() {
-    if (window.top === window) return mountPet({ nudges: true });
+  main(ctx) {
+    if (window.top === window) return mountPet({ nudges: true, ctx });
   },
 });

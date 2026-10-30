@@ -2,6 +2,7 @@ import { send } from '@/lib/messages';
 import { displayMood, EATING_MS, spriteName, type Mood, type PetState } from '@/lib/pet/state';
 import { canNudge, createBag, HUNGRY_NUDGES, NUDGES } from '../pet/nudges';
 import { createSounds } from './audio';
+import { soundsAllowed } from './sound-gate';
 import { BUBBLE_CSS, createBubble } from './bubble';
 import { pixelRing, ringShadow } from './focus-ring';
 import { OVERLAY_TAG, mountOverlay } from './host';
@@ -28,8 +29,14 @@ const CSS = `
   ${PANEL_CSS}
 `;
 
-export async function mountPet({ nudges = false } = {}) {
-  const root = mountOverlay();
+// WXT's content script context: tells us when the extension has been reloaded or updated underneath us
+interface Context {
+  onInvalidated(cb: () => void): unknown;
+}
+
+export async function mountPet({ nudges = false, ctx }: { nudges?: boolean; ctx?: Context } = {}) {
+  const overlay = mountOverlay();
+  const root = overlay.root;
   const style = document.createElement('style');
   style.textContent = CSS;
   const dock = document.createElement('div');
@@ -58,14 +65,22 @@ export async function mountPet({ nudges = false } = {}) {
   let nudgesOn = stored.nudgesEnabled !== false;
   let soundsOn = stored.soundsEnabled !== false;
   const sounds = createSounds();
-  const chirp = () => soundsOn && !napping && void sounds.chirp();
-  let walkSound = false; // the loop plays for as long as it walks, whichever way it faces
+  const readSettings = () => browser.storage.local.get(['soundsEnabled', 'napping']) as Promise<{ soundsEnabled?: boolean; napping?: boolean }>;
+  const chirp = () => {
+    if (!soundsOn || napping) return;
+    void soundsAllowed(readSettings).then((ok) => {
+      if (ok) void sounds.chirp();
+    });
+  };
+  let walking = false; // true for as long as it walks, whichever way it faces
   const setWalkSound = (on: boolean) => {
-    const want = on && soundsOn && !napping;
-    if (want === walkSound) return;
-    walkSound = want;
-    if (want) void sounds.startWalk();
-    else sounds.stopWalk();
+    if (on === walking) return;
+    walking = on;
+    if (!on) return sounds.stopWalk();
+    if (!soundsOn || napping) return;
+    void soundsAllowed(readSettings).then((ok) => {
+      if (ok && walking) sounds.startWalk();
+    });
   };
   const saved = (stored.petPositions as Record<string, unknown> | undefined)?.[location.hostname];
   let pos: Pos = isPos(saved) ? saved : DEFAULT_POS;
@@ -272,17 +287,26 @@ export async function mountPet({ nudges = false } = {}) {
     if ('nudgesEnabled' in changes) nudgesOn = changes.nudgesEnabled!.newValue !== false;
     if ('soundsEnabled' in changes) {
       soundsOn = changes.soundsEnabled!.newValue !== false;
-      if (!soundsOn) setWalkSound(false);
+      if (!soundsOn) sounds.stopWalk();
     }
     if ('napping' in changes) {
       napping = changes.napping!.newValue === true;
       if (napping) {
         bubble.hide();
-        setWalkSound(false);
+        sounds.stopWalk();
       }
     }
     if ('petState' in changes) state = changes.petState!.newValue as PetState | undefined;
     if ('account' in changes) connected = !!changes.account!.newValue;
     if ('petState' in changes || 'napping' in changes || 'account' in changes) apply();
+  });
+
+  // After a reload or update this copy can no longer hear the extension, so it leaves quietly
+  // instead of lingering with stale settings. A fresh copy arrives with the next page load.
+  ctx?.onInvalidated(() => {
+    sounds.stopWalk();
+    cancelAnimationFrame(raf);
+    sprite.destroy();
+    overlay.destroy();
   });
 }
