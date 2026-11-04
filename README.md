@@ -8,7 +8,7 @@ A pixel pet that lives in your browser, helps you remember your Buffer posting s
 
 It sits in the corner of the Buffer web app, and, once you let it, on the sites of the channels you've connected.
 
-Built for **Buffer Commit**. Work in progress.
+Install it from the [Chrome Web Store](https://chromewebstore.google.com/detail/sproutling/dndkfdgjaokpffieimgaoheogiohinmn), or see the [landing page](https://sproutling.pet). Built for **Buffer Commit**.
 
 ## How it works
 
