@@ -19,11 +19,26 @@ export const NUDGES = [
   'What’s one thing you learned in the last few minutes? Say it out loud, it sticks.',
   'Anything here worth passing along? A good post starts as a small thought.',
   'How’s your brain feeling: full, or snacking on crumbs?',
+  'Blink slowly, twice. There, eyes rewetted.',
+  'Roll your shoulders back. Mine are tiny and they feel better already.',
+  'One deep breath in, one slow one out. The page will wait.',
+  'Remember why you opened this tab? If yes, lovely. If not, that’s allowed too.',
+  'The feed never ends, which is exactly why you get to.',
+  'Loosen your grip on the mouse a little. Wiggle your toes while you’re at it.',
+  'Look out of a window if you’ve got one. Trees count double.',
+  'Did anything in that stretch make you smile? Keep that one.',
+  'Quick check: eyes, back, belly. Anyone asking for something?',
+  'Sprouts grow best with a bit of daylight. So do people.',
+  'Scrolling is a river. You’re allowed to step onto the bank.',
+  'A sip of tea and the page will still be right here.',
+  'Someone you like might enjoy a hello more than another scroll.',
+  'What would you like to do next? Not what the feed suggests. You.',
 ];
 
 export const HUNGRY_NUDGES = [
   'I’m a little peckish. Whenever you’ve got a post in you, no rush.',
   'If something here sparked an idea, jot it down. Ideas are snacks too.',
+  'Somewhere in all that scrolling, a thought of yours is waiting. Feed me?',
 ];
 
 /** Shuffle bag: every line once before any repeats, and never the same line twice in a row */
