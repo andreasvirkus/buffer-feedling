@@ -1,6 +1,7 @@
 """Brand images built from the Sproutling frames: extension icons, a 512px logo, a README banner and Chrome Web Store assets.
 
-Fonts are macOS system fonts; elsewhere the banner falls back to Pillow's default.
+The store assets use macOS system fonts; the banner and social preview use the site's own fonts from fonts/
+(Pixelify Sans and Atkinson Hyperlegible Next, both OFL), the same files the landing page and popup ship.
 """
 from pathlib import Path
 
@@ -31,6 +32,20 @@ def font(names, size):
         except OSError:
             continue
     return ImageFont.load_default(size=size)
+
+
+FONTS = Path(__file__).parent / "fonts"
+LEAF = (0, 112, 68)  # the site's green, darker than ACCENT so it holds up on the yellow
+
+
+def site_font(name, size, weight):
+    f = ImageFont.truetype(str(FONTS / name), size)
+    f.set_variation_by_axes([weight])
+    return f
+
+
+def pixel(size, weight=700):
+    return site_font("PixelifySans.ttf", size, weight)
 
 
 TITLE_FONT = ["/System/Library/Fonts/Supplemental/Arial Rounded Bold.ttf"]
@@ -70,8 +85,8 @@ def build_banner():
     d = ImageDraw.Draw(img)
 
     OY = 36  # centres the block vertically
-    d.text((W // 2, 100 + OY), "Sproutling", font=font(TITLE_FONT, 84), fill=OUT, anchor="mm")
-    d.text((W // 2, 186 + OY), "Post a little. Pause a little.", font=font(TITLE_FONT, 50), fill=ACCENT, anchor="mm")
+    d.text((W // 2, 100 + OY), "Sproutling", font=pixel(96), fill=OUT, anchor="mm")
+    d.text((W // 2, 186 + OY), "Post a little. Pause a little.", font=pixel(54), fill=LEAF, anchor="mm")
 
     moods = ["hungry", "idle", "full", "sleepy", "eating"]
     labels = ["hungry", "content", "full", "sleepy", "eating"]
@@ -79,14 +94,14 @@ def build_banner():
     gap = 44
     x0 = (W - (len(moods) * cell + (len(moods) - 1) * gap)) // 2
     top = 268 + OY
-    label_font = font(BODY_FONT, 28)
+    label_font = pixel(30, 600)
     for i, (m, label) in enumerate(zip(moods, labels)):
         x = x0 + i * (cell + gap)
         # soft ground shadow under the feet (feet sit at sprite row ~29)
         feet_y = top + 29 * K
         d.ellipse([x + cell * 0.2, feet_y - 4, x + cell * 0.8, feet_y + 14], fill=SHADOW)
         img.alpha_composite(sproutling(m).resize((cell, cell), Image.NEAREST), (x, top))
-        d.text((x + cell // 2, top + cell + 48), label, font=label_font, fill=MUTED, anchor="mm")
+        d.text((x + cell // 2, top + cell + 48), label, font=label_font, fill=(84, 72, 66), anchor="mm")
 
     BRAND.mkdir(parents=True, exist_ok=True)
     img.convert("RGB").save(BRAND / "banner.png")
