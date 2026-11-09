@@ -24,13 +24,13 @@ async function loadAnimation([name, { meta, sheet }]: [string, (typeof SPRITES)[
   return [name, { meta, sheet: await decode(sheet) }];
 }
 
-export async function createSprite(initial: string) {
+export async function createSprite(initial: string, scale = SCALE) {
   const anims = new Map(await Promise.all(Object.entries(SPRITES).map(loadAnimation)));
   const size = anims.get('idle')!.meta.frameSize;
 
   const canvas = document.createElement('canvas');
-  canvas.width = size * SCALE;
-  canvas.height = size * SCALE;
+  canvas.width = size * scale;
+  canvas.height = size * scale;
   const ctx = canvas.getContext('2d')!;
   ctx.imageSmoothingEnabled = false;
 
