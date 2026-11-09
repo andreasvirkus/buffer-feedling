@@ -18,6 +18,8 @@
     <meta name="twitter:title" content="Sproutling" />
     <meta name="twitter:image" content="https://sproutling.pet/share.png" />
     <link rel="icon" href="favicon.png" />
+    <link rel="preload" href="fonts/pixelify-sans.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="fonts/atkinson-hyperlegible-next.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -26,57 +28,50 @@
       <nav aria-label="Primary">
         <a href="#features">Features</a>
         <a href="#moods">Moods</a>
-        <a href="https://chromewebstore.google.com/detail/sproutling/dndkfdgjaokpffieimgaoheogiohinmn">Install</a>
         <a href="https://github.com/andreasvirkus/buffer-feedling">GitHub</a>
+        <a class="button small primary" href="https://chromewebstore.google.com/detail/sproutling/dndkfdgjaokpffieimgaoheogiohinmn">Install</a>
       </nav>
     </header>
 
     <main id="top">
       <section class="hero">
-        <div class="hero-copy">
-          <h1>Post a little. Pause a little.</h1>
-          <div class="lede">
-            <p class="lede-main"><em>Sproutling</em> is a tiny pixel pet that keeps you company in your browser.</p>
-            <ul class="beats">
-              <li class="beat">
-                <canvas data-pet="hungry" data-scale="2" role="img" aria-label="A hungry Sproutling"></canvas>
-                <p>
-                  It's fed by what you post on Buffer, but gets peckish if you don&apos;t feed it new post ideas every once in a
-                  while.
-                </p>
-              </li>
-              <li class="beat">
-                <canvas data-pet="idle" data-scale="2" role="img" aria-label="Sproutling with something to say"></canvas>
-                <p class="speech">
-                  When it notices you mindlessly scrolling for a little too long, it has a kind word for you: stretch, sip
-                  some water, reflect on what you've consumed.
-                </p>
-              </li>
-            </ul>
-          </div>
-          <p class="cta">
-            <a class="button primary" href="#install">Get the extension</a>
-            <a class="button" href="https://chromewebstore.google.com/detail/sproutling/dndkfdgjaokpffieimgaoheogiohinmn">Add to Chrome</a>
-          </p>
+        <div class="scene" aria-hidden="true">
+          <svg class="sun" viewBox="0 0 13 13"><path d="M6 0h1v1h-1zM6 1h1v1h-1zM2 2h1v1h-1zM10 2h1v1h-1zM5 3h3v1h-3zM4 4h5v1h-5zM3 5h7v1h-7zM0 6h2v1h-2zM3 6h7v1h-7zM11 6h2v1h-2zM3 7h7v1h-7zM4 8h5v1h-5zM5 9h3v1h-3zM2 10h1v1h-1zM10 10h1v1h-1zM6 11h1v1h-1zM6 12h1v1h-1z"/></svg>
+          <svg class="moon" viewBox="0 0 13 13"><path d="M4 1h2v1h-2zM3 2h2v1h-2zM2 3h3v1h-3zM1 4h4v1h-4zM1 5h4v1h-4zM1 6h4v1h-4zM1 7h5v1h-5zM1 8h6v1h-6zM2 9h9v1h-9zM3 10h7v1h-7zM4 11h5v1h-5z"/></svg>
+          <svg class="cloud-a" viewBox="0 0 24 7"><path d="M8 0h6v1h-6zM6 1h10v1h-10zM19 1h4v1h-4zM2 2h16v1h-16zM19 2h5v1h-5zM1 3h22v1h-22zM0 4h24v1h-24zM0 5h24v1h-24zM1 6h22v1h-22z"/></svg>
+          <svg class="cloud-b" viewBox="0 0 14 5"><path d="M4 0h4v1h-4zM2 1h8v1h-8zM11 1h2v1h-2zM0 2h14v1h-14zM0 3h14v1h-14zM1 4h12v1h-12z"/></svg>
         </div>
 
-        <div class="stage">
-          <div class="stage-pet">
-            <canvas id="hero-pet" role="img" aria-label="Sproutling, the pixel pet"></canvas>
-          </div>
-          <p id="hero-caption" class="caption" aria-live="polite">Sproutling is content.</p>
-          <div class="switcher" role="group" aria-label="Preview a mood">
-            <button type="button" data-mood="hungry">Hungry</button>
-            <button type="button" data-mood="idle" aria-pressed="true">Content</button>
-            <button type="button" data-mood="full">Full</button>
-            <button type="button" data-mood="sleepy">Sleepy</button>
-            <button type="button" data-mood="eating">Eating</button>
-          </div>
+        <h1><span>Post a little.</span> <span>Pause a little.</span></h1>
+        <div class="lede">
+          <p class="lede-main"><em>Sproutling</em> is a tiny pixel pet that keeps you company in your browser.</p>
+          <ul class="beats">
+            <li class="beat">
+              <canvas data-pet="hungry" data-scale="3" role="img" aria-label="A hungry Sproutling"></canvas>
+              <p>
+                It's fed by what you post on Buffer, but gets peckish if you don&apos;t feed it new post ideas every once in a
+                while.
+              </p>
+            </li>
+            <li class="beat">
+              <canvas data-pet="idle" data-scale="3" role="img" aria-label="Sproutling with something to say"></canvas>
+              <p class="speech">
+                When it notices you mindlessly scrolling for a little too long, it has a kind word for you: stretch, sip
+                some water, reflect on what you've consumed.
+              </p>
+            </li>
+          </ul>
         </div>
+        <p class="cta">
+          <a class="button primary" href="#install">Get the extension</a>
+          <a class="button" href="https://chromewebstore.google.com/detail/sproutling/dndkfdgjaokpffieimgaoheogiohinmn">Add to Chrome</a>
+        </p>
       </section>
 
-      <section class="how" aria-labelledby="how-h">
-        <h2 id="how-h">How it works</h2>
+      <section class="how split" aria-labelledby="how-h">
+        <div class="split-head">
+          <h2 id="how-h">How it works</h2>
+        </div>
         <ol class="steps">
           <li>
             <h3>Connect Buffer</h3>
@@ -97,87 +92,93 @@
         </ol>
       </section>
 
-      <section id="features" class="features" aria-labelledby="features-h">
-        <h2 id="features-h">What it does</h2>
-        <p class="sub">A reminder for your streak, and a calm presence for when the scrolling goes on a bit long.</p>
-
-        <div class="nudge-demo">
-          <canvas id="nudge-pet" role="img" aria-label="Sproutling with a speech bubble"></canvas>
-          <div class="speech" id="nudge-line" role="status" aria-live="polite">Saw anything you’d want to share with others?</div>
-          <button type="button" id="nudge-next" class="button">Another nudge</button>
+      <section id="features" class="features split" aria-labelledby="features-h">
+        <div class="split-head">
+          <h2 id="features-h">What it does</h2>
+          <p class="sub">A reminder for your streak, and a calm presence for when the scrolling goes on a bit long.</p>
+          <div class="nudge-demo">
+            <div class="speech plain" id="nudge-line" role="status" aria-live="polite">Saw anything you’d want to share with others?</div>
+            <button type="button" id="nudge-next" class="button">Another nudge</button>
+          </div>
         </div>
 
-        <h3 class="group">Ready now</h3>
-        <ul class="feature-grid">
-          <li>
-            <h3>Lives on Buffer</h3>
-            <p>A pixel pet in the corner of your Buffer app that remembers your streak for you, with five moods and little animations for each.</p>
-          </li>
-          <li>
-            <h3>Visits your channels</h3>
-            <p>Tap a connected channel in the popup and Sproutling shows up on that site too: LinkedIn, X, Instagram, Bluesky and more. One site at a time, and you can take it back whenever.</p>
-          </li>
-          <li>
-            <h3>Gentle nudges</h3>
-            <p>Scroll for a long while and Sproutling pipes up in a speech bubble: “Let’s pause and reflect on what we’ve consumed.” It starts chatty, then eases off. A soft chirp goes with it. There’s a switch if you’d rather it stayed quiet.</p>
-          </li>
-          <li>
-            <h3>Works without Buffer</h3>
-            <p>Not on Buffer? Pick the sites you scroll on and Sproutling keeps you company there, with the same gentle nudges. The streak side simply waits until you connect.</p>
-          </li>
-          <li>
-            <h3>Yours to arrange</h3>
-            <p>Drag it wherever it's out of the way and it remembers the spot for each site. Click it for how it's feeling, a way back to Buffer and a nap button. Or focus it and walk it around with the arrow keys or WASD. If it bumps into an edge it jogs on the spot for a bit, then turns to face you.</p>
-          </li>
-          <li>
-            <h3>Eats on arrival</h3>
-            <p>When a new post, draft or idea shows up, Sproutling munches for a few seconds. That’s the whole reward system.</p>
-          </li>
-        </ul>
+        <div>
+          <h3 class="group">Ready now</h3>
+          <ul class="rows">
+            <li>
+              <h3>Lives on Buffer</h3>
+              <p>A pixel pet in the corner of your Buffer app that remembers your streak for you, with five moods and little animations for each.</p>
+            </li>
+            <li>
+              <h3>Visits your channels</h3>
+              <p>Tap a connected channel in the popup and Sproutling shows up on that site too: LinkedIn, X, Instagram, Bluesky and more. One site at a time, and you can take it back whenever.</p>
+            </li>
+            <li>
+              <h3>Gentle nudges</h3>
+              <p>Scroll for a long while and Sproutling pipes up in a speech bubble: “Let’s pause and reflect on what we’ve consumed.” It starts chatty, then eases off. A soft chirp goes with it. There’s a switch if you’d rather it stayed quiet.</p>
+            </li>
+            <li>
+              <h3>Works without Buffer</h3>
+              <p>Not on Buffer? Pick the sites you scroll on and Sproutling keeps you company there, with the same gentle nudges. The streak side simply waits until you connect.</p>
+            </li>
+            <li>
+              <h3>Yours to arrange</h3>
+              <p>Drag it wherever it's out of the way and it remembers the spot for each site. Click it for how it's feeling, a way back to Buffer and a nap button. Or focus it and walk it around with the arrow keys or WASD. If it bumps into an edge it jogs on the spot for a bit, then turns to face you.</p>
+            </li>
+            <li>
+              <h3>Eats on arrival</h3>
+              <p>When a new post, draft or idea shows up, Sproutling munches for a few seconds. That’s the whole reward system.</p>
+            </li>
+          </ul>
 
-        <h3 class="group">Coming up</h3>
-        <ul class="feature-grid soon">
-          <li>
-            <h3>More to say <span class="badge">Planned</span></h3>
-            <p>A bigger bag of kind words, and a short walkthrough video.</p>
-          </li>
-        </ul>
+          <h3 class="group">Coming up</h3>
+          <ul class="rows">
+            <li>
+              <h3>More to say <span class="badge">Planned</span></h3>
+              <p>A bigger bag of kind words, and a short walkthrough video.</p>
+            </li>
+          </ul>
+        </div>
       </section>
 
       <section id="moods" class="moods" aria-labelledby="moods-h">
-        <h2 id="moods-h">Five moods</h2>
-        <p class="sub">It never dies. The worst that happens is a nap.</p>
+        <div class="moods-head">
+          <h2 id="moods-h">Five moods</h2>
+          <p class="sub">It never dies. The worst that happens is a nap.</p>
+        </div>
         <ul class="mood-grid">
           <li>
-            <canvas data-pet="hungry" role="img" aria-label="Hungry Sproutling"></canvas>
+            <canvas data-pet="hungry" data-scale="3" role="img" aria-label="Hungry Sproutling"></canvas>
             <h3>Hungry</h3>
             <p>You've been around, but you're behind on your goals. A post would help.</p>
           </li>
           <li>
-            <canvas data-pet="idle" role="img" aria-label="Content Sproutling"></canvas>
+            <canvas data-pet="idle" data-scale="3" role="img" aria-label="Content Sproutling"></canvas>
             <h3>Content</h3>
             <p>Partway to your goals, or posts are scheduled. Nothing to worry about.</p>
           </li>
           <li>
-            <canvas data-pet="full" role="img" aria-label="Full Sproutling"></canvas>
+            <canvas data-pet="full" data-scale="3" role="img" aria-label="Full Sproutling"></canvas>
             <h3>Full</h3>
             <p>Goals hit. Drafts take the edge off a little, but they don't count as dinner.</p>
           </li>
           <li>
-            <canvas data-pet="sleepy" role="img" aria-label="Sleepy Sproutling"></canvas>
+            <canvas data-pet="sleepy" data-scale="3" role="img" aria-label="Sleepy Sproutling"></canvas>
             <h3>Sleepy</h3>
             <p>Three quiet days. It wakes up the moment you do something.</p>
           </li>
           <li>
-            <canvas data-pet="eating" role="img" aria-label="Eating Sproutling"></canvas>
+            <canvas data-pet="eating" data-scale="3" role="img" aria-label="Eating Sproutling"></canvas>
             <h3>Eating</h3>
             <p>A new post, draft or idea just showed up. Lasts a few seconds.</p>
           </li>
         </ul>
       </section>
 
-      <section class="privacy" aria-labelledby="privacy-h">
-        <h2 id="privacy-h">What it can see</h2>
+      <section class="privacy split" aria-labelledby="privacy-h">
+        <div class="split-head">
+          <h2 id="privacy-h">What it can see</h2>
+        </div>
         <ul class="checks">
           <li>Read-only access: <code>account:read</code>, <code>posts:read</code>, <code>ideas:read</code>.</li>
           <li>No server of ours. The extension talks to Buffer's API directly from your browser.</li>
@@ -187,21 +188,25 @@
         </ul>
       </section>
 
-      <section id="install" class="install" aria-labelledby="install-h">
-        <h2 id="install-h">Install</h2>
-        <p class="sub">Sproutling is on the Chrome Web Store. It takes a few seconds.</p>
-        <ol class="steps compact">
-          <li><p>Add Sproutling from the <a href="https://chromewebstore.google.com/detail/sproutling/dndkfdgjaokpffieimgaoheogiohinmn">Chrome Web Store</a>.</p></li>
-          <li><p>Click the Sproutling icon in the toolbar. Connect Buffer, or skip it and just pick the sites you scroll on.</p></li>
-          <li><p>Choose where it may visit. Chrome asks you before Sproutling appears on any site.</p></li>
-        </ol>
-        <p class="cta">
-          <a class="button primary" href="https://chromewebstore.google.com/detail/sproutling/dndkfdgjaokpffieimgaoheogiohinmn">Add to Chrome</a>
-        </p>
-        <p class="sub">
-          Prefer to build it yourself? Sproutling is open source, and the setup steps are in the
-          <a href="https://github.com/andreasvirkus/buffer-feedling#setup">README on GitHub</a>.
-        </p>
+      <section id="install" class="install split" aria-labelledby="install-h">
+        <div class="split-head">
+          <h2 id="install-h">Install</h2>
+          <p class="sub">Sproutling is on the Chrome Web Store. It takes a few seconds.</p>
+        </div>
+        <div>
+          <ol class="steps compact">
+            <li><p>Add Sproutling from the <a href="https://chromewebstore.google.com/detail/sproutling/dndkfdgjaokpffieimgaoheogiohinmn">Chrome Web Store</a>.</p></li>
+            <li><p>Click the Sproutling icon in the toolbar. Connect Buffer, or skip it and just pick the sites you scroll on.</p></li>
+            <li><p>Choose where it may visit. Chrome asks you before Sproutling appears on any site.</p></li>
+          </ol>
+          <p class="cta">
+            <a class="button primary" href="https://chromewebstore.google.com/detail/sproutling/dndkfdgjaokpffieimgaoheogiohinmn">Add to Chrome</a>
+          </p>
+          <p class="sub">
+            Prefer to build it yourself? Sproutling is open source, and the setup steps are in the
+            <a href="https://github.com/andreasvirkus/buffer-feedling#setup">README on GitHub</a>.
+          </p>
+        </div>
       </section>
     </main>
 

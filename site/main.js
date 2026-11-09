@@ -76,24 +76,9 @@ function player(canvas, scale) {
   };
 }
 
-const hero = player(document.getElementById('hero-pet'), 8);
-hero.set('idle');
-
-const caption = document.getElementById('hero-caption');
-const buttons = [...document.querySelectorAll('.switcher button')];
-for (const b of buttons) {
-  b.addEventListener('click', () => {
-    for (const o of buttons) o.setAttribute('aria-pressed', String(o === b));
-    hero.set(b.dataset.mood);
-    caption.textContent = `Sproutling is ${b.textContent.toLowerCase()}.`;
-  });
-}
-
 for (const canvas of document.querySelectorAll('canvas[data-pet]')) {
   player(canvas, Number(canvas.dataset.scale) || 4).set(canvas.dataset.pet);
 }
-
-player(document.getElementById('nudge-pet'), 6).set('idle');
 
 const NUDGES = [
   'Saw anything you’d want to share with others?',
