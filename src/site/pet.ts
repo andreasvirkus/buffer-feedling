@@ -16,7 +16,7 @@ const CSS = `
   .sp-pet canvas { image-rendering: pixelated; display: block; }
   .sp-halo { display: none; position: absolute; z-index: 0; width: 2px; height: 2px; pointer-events: none; }
   .sp-dock:has(.sp-pet:focus-visible) .sp-halo { display: block; }
-  .sp-hint { position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); margin-bottom: 6px; padding: 6px 10px; border: 2px solid #1f1a24; border-radius: 8px; background: #fffdf7; color: #1f1a24; font: 600 13px/1.3 system-ui, sans-serif; white-space: nowrap; pointer-events: none; transition: opacity 0.3s; }
+  .sp-hint { position: absolute; right: 0; bottom: 100%; margin-bottom: 6px; padding: 6px 10px; border: 2px solid #1f1a24; border-radius: 8px; background: #fffdf7; color: #1f1a24; font: 600 13px/1.3 system-ui, sans-serif; white-space: nowrap; pointer-events: none; transition: opacity 0.3s; }
   .sp-hint[hidden] { display: none; }
   @media (forced-colors: active) {
     .sp-pet:focus-visible { outline: 3px solid Highlight; outline-offset: 2px; }
